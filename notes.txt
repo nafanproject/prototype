@@ -1,0 +1,19 @@
+
+Creating the Django project with Postgres
+-----------------------------------------
+Terminal: python3 -m venv env
+VS Code: open the Command Palette (View > Command Palette or (⇧⌘P)). Then select the Python: Select Interpreter command
+VS Code: Run Terminal: Create New Terminal (⌃⇧`) from the Command Palette
+VS Code: python -m pip install --upgrade pip
+VS Code: python -m pip install django
+VS Code: source env/bin/activate
+VS Code: django-admin startproject web_project .
+Terminal: brew install postgresql
+VS Code: python manage.py migrate
+VS Code: python manage.py runserver
+
+Github
+------
+email: aaf8qn@virginia.edu
+password: @123Virginia
+username: aaf8qn

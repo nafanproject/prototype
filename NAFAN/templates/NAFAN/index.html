@@ -1,0 +1,54 @@
+
+{% extends "NAFAN/Headers/public_header.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+	<div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+            <form class="card card-sm">
+                <div class="card-body row no-gutters align-items-center">
+                    <div class="col-auto">
+                        <i class="fas fa-search h4 text-body"></i>
+                    </div>
+                    <!--end of col-->
+                    <div class="col">
+                        <input class="form-control form-control-lg form-control-borderless" type="search" placeholder="Search archives">
+                    </div>
+                    <!--end of col-->
+                    {% comment %} <div class="col-auto">
+                        <button class="btn btn-lg btn-success" type="submit">Search</button>
+                    </div> {% endcomment %}
+                    <!--end of col-->
+                </div>
+            </form>
+
+            <div id="index_notes">
+                <h4>
+                </h4>
+                <p>When a user comes to the site they are either researchers, contributors, or someone who has yet to determine
+                their role.  This landing page provides for all three.
+                </p>
+                <p>The New to NAFAN? link takes the user to a page that orientates them whether they are a researcher or a contributor.
+                It is essentially a beefed-up About page that can also serve as the hub of an online support architecture.  Button vs.
+                hyperlink?  Have a look at this: <a href="https://uxmovement.com/buttons/when-to-use-a-button-or-link/" target="blank">Button or Link</a>
+                </p>
+                <p>The Login is initially for contributors and site administrators.  It has yet to be determined if researchers
+                will be provided a login.  It may be deemed useful for benefits such as saving search queries or maintaining a set of
+                preferred repositories.
+                </p>
+                <p>The results of the search need to be determined.  I'm sure the discussion will be vigorous.</p>
+                <p><h5>Footers</h5></p>
+                <p>Footers are generally pointless.  They take up real estate and on a site like this would not even be encountered
+                often as the search results will likely be lengthy. The copyright is pointless as well.  The individual
+                finding aids may require their own copyrights, but web pages don't need them.  Again, have a look at
+                Google's landing page - no footer and no copyright.
+                </p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
