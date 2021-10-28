@@ -1,32 +1,74 @@
 
-{% extends "NAFAN/Headers/public_header.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-{% block content %}
+    {% block title %}<title>NAFAN - The National Finding Aid Network</title>{% endblock %}
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    
+    <!-- Add additional CSS in static file -->
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'site.css' %}"/>
+
+    <script type="text/javascript">
+      NAFAN = {};
+    </script>
+ 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js">  </script>    
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">  </script>     
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"rel="stylesheet" type="text/css" />  
+
+</head>
+
+<body>
 
 <div class="container-fluid">
 
+    <div class="row top-buffer">
+
+      <div class="col-sm-2">
+          <a href="/newToNAFAN">New to NAFAN?</a>
+      </div>
+
+      <div class="col-sm-8">
+        <h2 class="page-header text-center">Welcome to NAFAN</h2>
+      </div>
+
+      <div class="col-sm-2">
+          <a class="float-right" href="/nafanlogin">Login</a>
+      </div>
+      
+    </div>
+    
 	<div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8">
-            <form class="card card-sm">
+            <form class="card card-sm" action="{% url 'home' %}" method="get">
                 <div class="card-body row no-gutters align-items-center">
                     <div class="col-auto">
                         <i class="fas fa-search h4 text-body"></i>
                     </div>
-                    <!--end of col-->
                     <div class="col">
-                        <input class="form-control form-control-lg form-control-borderless" type="search" placeholder="Search archives">
+                        <input class="form-control form-control-lg form-control-borderless" name="searchTerm" type="search" placeholder="Search archives">
                     </div>
-                    <!--end of col-->
-                    {% comment %} <div class="col-auto">
-                        <button class="btn btn-lg btn-success" type="submit">Search</button>
-                    </div> {% endcomment %}
-                    <!--end of col-->
                 </div>
             </form>
 
+            {% if search_term  %}
+
+                <p>Searched for: {{ search_term }}</p>
+
+                {% for data in response %}
+                    <p>{{ data.repository }}</p>
+                    <p>{{ data.content }}</p>
+                {% endfor %}
+
+            {% else %}
+
             <div id="index_notes">
-                <h4>
-                </h4>
                 <p>When a user comes to the site they are either researchers, contributors, or someone who has yet to determine
                 their role.  This landing page provides for all three.
                 </p>
@@ -38,17 +80,16 @@
                 will be provided a login.  It may be deemed useful for benefits such as saving search queries or maintaining a set of
                 preferred repositories.
                 </p>
-                <p>The results of the search need to be determined.  I'm sure the discussion will be vigorous.</p>
-                <p><h5>Footers</h5></p>
-                <p>Footers are generally pointless.  They take up real estate and on a site like this would not even be encountered
-                often as the search results will likely be lengthy. The copyright is pointless as well.  The individual
-                finding aids may require their own copyrights, but web pages don't need them.  Again, have a look at
-                Google's landing page - no footer and no copyright.
-                </p>
+                <p>The results of the search need to be determined.</p>
             </div>
+
+            {% endif %}
         </div>
     </div>
 
+    <footer>
+        <p></p>
+    </footer>
 </div>
-
-{% endblock %}
+</body>
+</html>

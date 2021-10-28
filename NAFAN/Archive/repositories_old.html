@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    {% block title %}<title>NAFAN - The National Finding Aid Network</title>{% endblock %}
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+
+    <!-- Add additional CSS in static file -->
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'site.css' %}"/>
+
+    <script type="text/javascript">
+      NAFAN = {};
+      NAFAN.DefaultID = -1;
+    </script>
+ 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">  </script> 
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>    
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"rel="stylesheet" type="text/css" />  
+
+</head>
+
+<body>
+
+<div class="container_fluid">
+
+  <div class="row top-buffer">
+
+      <div class="col-sm-2">
+        {% if user_type == "contributor_admin" %}
+           <a href="/contributor_admin">Admin</a>
+        {% else %}
+           <a href="/nafan_admin">Admin</a>
+        {% endif %}
+      </div>
+
+      <div class="col-sm-8">
+         <h2 class="page-header text-center">Repositories</h2>
+      </div>
+
+      <div class="col-sm-2">
+          <button class="btn btn-md btn-primary float-right" type="button" onclick="location.href='/logout'">Logout</button>
+      </div>
+      
+  </div>
+
+	<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+
+      <div class="col-sm-12">
+
+        {% if user_type == "contributor_admin" %}
+
+          <p>A contributor admin will only have access to repositories assigned, therefore a pick list is appropriate.  If we feel that
+             someone may have access to more than is feasible for a pick list, we can reconsider.  If a contributer admin has only one repository
+             the pick list should not be displayed and the repository information is immediately displayed.
+          </p>
+
+          <select id="contributor_repositories">
+            <option value="">Select a repository</option>
+            {% for item in repositories %}
+              <option value={{ item.id }}>{{ item.repository_name }}</option>
+            {% endfor %}
+          </select>
+
+        {% else %}
+        
+          <p>This page requires the ability for a NAFAN Admin to create a new repository</p>
+          
+          <p>As a NAFAN Admin will have access to thousands of repositories, a pick list or grid is infeasible.  Instead,
+             an autocomplete mechansim will provide faster access to the desired repository.  This assumes an admin has
+             no reason to browse repositories, but is looking for a specific one.  Start entering the name of the repository
+             in the input box below.  As you type, a list of matching repositories will display in a selection list 
+             attached to the input box.  When you see the one desired, select the name and its information  will appear.
+          </p>
+
+          <p>The repository names are going to have to be unique.  For example, I have seen things like Johnson County Historical
+             Society across multiple states.  These names would have to be expanded to Johnson County Missouri Historical Society.
+          </p>
+
+          <input type="text" id="tags">
+
+        {% endif %}
+
+      </div>
+
+      <div class="col-md-12" id="edit_area" style="display:none">
+    
+        <br/>
+        <p>This is a subset of the repository data available through the RepoData dataset.  There is yet no determination which fields of 
+          that dataset are relevant to the NAFAN project.  A note about the data: while efforts have been made to remove duplicates from
+          the RepoData spreadsheet, it appears some still remain.  The data needs further investigation.  Parent organization needs some
+          discussion as well.  Many repositories have no assigned parent organization in the dataset.  It is also fairly common for a 
+          repository to have no greater authority than itself.  How to represent this needs discussion.  As an editorial note, I am not
+          a fan of the Address 2 approach.  No one has ever done a search on Address 2.  Just enter the Suite number with Address.
+        </p>
+
+        <p>Likely additional fields here would be a default finding aid format and a harvesting location.  The finding aid format tells
+           us the format to expect when harvesting finding aids and a default presentation for creating new finding aids associated
+           with the repository.  The harvesting location tells us where to find finding aids that should be periodically pulled from
+           a repository's storage.
+        </p>
+
+        <form action="/Admin/repositories/" method="post">
+
+          {% csrf_token %}
+
+        <div class="row">
+
+          <div class="col-md-12">
+            <a href="/FindingAids/finding_aids"><span id="finding_aid"></span>'s Finding Aids</a>
+          </div>
+
+          <div class="col-md-6">
+
+              <div class="form_field_container">
+                  <label class="form_label">Repository Name</label>
+                  <input name="repository_name" type="text" class="form-control large_field" id="repository_name" placeholder="Repository Name (Required)">
+              </div>
+
+              <div class="form_field_container">
+                  <label class="form_label">Parent Organization</label>
+                  <input name="parent_organization" type="text" class="form-control large_field" id="parent_organization" placeholder="Parent Organization">
+              </div>
+
+              <div class="form_field_container">
+                  <label class="form_label">Repository Type</label>
+                  <input name="repository_type" type="text" class="form-control large_field" id="repository_type" placeholder="Repository Type">
+              </div>
+
+          </div>
+
+          <div class="col-md-6">
+
+              <div class="form_field_container">
+                  <label class="form_label">Address</label>
+                  <input name="address" type="text" class="form-control large_field" id="address" placeholder="Address">
+              </div>
+
+              <div class="form_field_container">
+                  <label class="form_label">City</label>
+                  <input name="city" type="text" class="form-control large_field" id="city" placeholder="City">
+              </div>
+
+              <div class="form_field_container">
+                  <label class="form_label">State</label>
+                  <input name="state" type="text" class="form-control large_field" id="state" placeholder="State">
+              </div>
+
+              <div class="form_field_container">
+                  <label class="form_label">Zip</label>
+                  <input name="zip" type="text" class="form-control large_field" id="zip" placeholder="Zip">
+              </div>
+
+          </div>
+
+          <div class="col-md-12">
+              <div class="form_field_container right_aligned_button_container">                            
+                  <button type="submit" class="btn btn-primary" id="save"><span class="fal fa-save icon_spacer"></span> Save</button>
+              </div>
+          </div>
+
+
+        </div>
+
+      </form>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="row top-buffer">
+    <p><b>Add new repository</b></p>
+    <p><b>Feedback on the save</b></p>
+  </div>
+
+</div>
+
+<script>
+
+  $(document).ready(function() {
+
+  });
+
+  $(function() {
+    NAFAN.availableTags = [
+      {% for repository in repositories %}
+        "{{repository.repository_name}}",
+      {% endfor %}
+    ];
+
+    $("#tags").autocomplete({
+      source: NAFAN.availableTags,
+
+      select: function (event, ui) {
+
+        GetRepository(ui.item.label);
+        
+      }
+    })
+  });
+
+  $("#contributor_repositories").change(function () {
+
+      var name = $('#contributor_repositories :selected').text();
+      GetRepository(name);
+
+  });
+
+  function GetRepository(name) {
+
+        $.ajax({
+          url: '/smith/get_repository/',
+          data: {'name' : name},
+          dataType: 'json',
+          success: function (data) {
+            // Really hating the way Django is returning objects
+            var repository = data[0].fields;
+            NAFAN.SelectedRepositories = NAFAN.SelectedRepositories + repository.repository_name + "; ";
+            {% comment %} $('#sel').text(NAFAN.SelectedRepositories); {% endcomment %}
+
+            $('#finding_aid').text(repository.repository_name);
+            $('#repository_name').val(repository.repository_name);
+            $('#parent_organization').val(repository.parent_organization);
+            $('#repository_type').val(repository.repository_type);
+            $('#address').val(repository.street_address_1);
+            $('#city').val(repository.st_city);
+            $('#state').val(repository.state);
+            $('#zip').val(repository.st_zip_code_5_numbers);
+
+            $('#edit_area').show();            
+
+            $('#tags').val("");
+          }
+        });
+  }
+
+
+</script>

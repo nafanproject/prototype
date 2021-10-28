@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    {% block title %}<title>NAFAN - The National Finding Aid Network</title>{% endblock %}
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+
+    <!-- Add additional CSS in static file -->
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'NAFAN/site.css' %}"/>
+
+    <script type="text/javascript">
+      NAFAN = {};
+      NAFAN.DefaultID = -1;
+    </script>
+ 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">  </script> 
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>    
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"rel="stylesheet" type="text/css" />  
+
+</head>
+
+<body>
+
+<div class="container_fluid">
+
+  <div class="row top-buffer">
+
+      <div class="col-sm-2">
+      </div>
+
+      <div class="col-sm-8">
+         <h2 class="page-header text-center">Contributer Admin</h2>
+     </div>
+
+      <div class="col-sm-2">
+          <button class="btn btn-md btn-primary float-right" type="button" onclick="location.href='/logout'">Logout</button>
+      </div>
+      
+  </div>
+
+	<div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+
+          <h4><a href="/Admin/repositories">Repositories</a></h4>
+
+          <p>A Contributor Admin has access to repositories as assigned by a NAFAN Admin.  Contributor Admins can
+             have access to multiple repositories.  A Contributer Admin can edit the repository information and
+             split and merge repositories assigned.  I am not sure if the Contributor Admin should have the ability
+             to activate and deactivate a repository.  They probably should.
+          </p>
+
+          <h4><a href="/Admin/users">Users</a></h4>
+
+          <p>A Contributor Admin can perform all user actions.  These include adding users, editing user
+             information and activating and deactivating a user.  The Contributor Admin also designates
+             which repositories their users can access.
+          </p>
+          
+          <h4><a href="/Admin/audit">Audit</a></h4>
+
+          <p>A Contributor Admin has access to audit information concerning their repositories.
+          </p>
+          
+      </div>
+  </div>
+
+</div>
+
+</body>
+</html>

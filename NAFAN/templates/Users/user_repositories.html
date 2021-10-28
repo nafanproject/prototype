@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    {% block title %}<title>NAFAN - The National Finding Aid Network</title>{% endblock %}
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+
+    <!-- Add additional CSS in static file -->
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'NAFAN/site.css' %}"/>
+
+    <script type="text/javascript">
+      NAFAN = {};
+      NAFAN.DefaultID = -1;
+    </script>
+ 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">  </script> 
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>    
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"rel="stylesheet" type="text/css" />  
+
+</head>
+
+<body>
+
+<div class="container_fluid">
+
+  <div class="row top-buffer">
+
+      <div class="col-sm-2">
+        {% if user_type == "contributor_admin" %}
+           <a href="/contributor_admin">Admin</a>
+        {% else %}
+           <a href="/nafan_admin">Admin</a>
+        {% endif %}
+      </div>
+
+      <div class="col-sm-8">
+         <h2 class="page-header text-center">User Repositories</h2>
+      </div>
+
+      <div class="col-sm-2">
+          <button class="btn btn-md btn-primary float-right" type="button" onclick="location.href='/logout'">Logout</button>
+      </div>
+      
+  </div>
+
+	<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+
+      <div class="col-sm-12">
+
+          <p>NAFAN admins have access to all repositories.  As with the search on the repository page, an autocomplete is recommended
+             in order to facilitate finding a repository.  Selecting the repository from the list adds it and updates the grid.  An "Are
+             you sure" may be warranted for Unassign.  Not positive, since it is easy to reassign the repository without loss of data.
+          </p>
+
+          <p>The interface for a contributor admin should be different. Since there are fewer repositories to consider, maybe there is a
+             dropdown element instead with the list of admin's assigned repositories.  The contributor admin cannot assign a repository
+             unless they are already associated with it.
+          </p>
+
+    <h3>User: {{ username }}</h3>
+    
+    <p></p>
+
+    <span>Add Repository </span><input type="text" class="ex_large_field" id="tags">
+
+  </div>
+
+  <div class="col-md-12" id="manage_content_area">
+
+        <br/>
+        <div class="table-responsive">
+          <table class="table table-striped" id="repository_table">
+
+            <tr>
+              <th>Repository Name</th>
+              <th></th>
+            </tr>
+
+            {% for item in user_repositories %}
+              <tr> 
+                <td>{{ item.repository_name }}</td>
+                <td><button type="button" id="{{ item.repository_name }}" class="unassign btn btn-primary" > Unassign</a> </td>
+              </tr>
+            {% endfor %}
+
+          </table>
+        </div>
+
+  </div>
+
+</div>
+
+<script>
+
+  $.curCSS = function(element, prop, val) {
+      return jQuery(element).css(prop, val);
+  };
+
+  $(document).ready(function() {
+
+    NAFAN.User = "{{ username }}"
+
+  });
+
+  $(function() {
+    NAFAN.availableTags = [
+      {% for repository in repositories %}
+        "{{repository.repository_name}}",
+      {% endfor %}
+    ];
+
+    $("#tags").autocomplete({
+      source: NAFAN.availableTags,
+
+      select: function (event, ui) {
+        $.ajax({
+          url: '/ajax/add_user_repository/',
+          data: {'username': NAFAN.User, 'repository' : ui.item.label},
+          dataType: 'json',
+          success: function (data) {
+            location.reload();
+          }
+        });
+      }
+    })
+  });
+
+$('#repository_table').on('click', '.unassign', function () {
+
+  var id = $(this).attr('id');
+
+  $.ajax({
+    url: '/smith/remove_user_repository/',
+    data: {'username': NAFAN.User, 'repository' : id},
+    dataType: 'json',
+    success: function (data) {
+      location.reload();
+    }
+  });
+
+})
+
+</script>
+

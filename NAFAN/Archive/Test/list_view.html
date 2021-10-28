@@ -1,0 +1,26 @@
+
+<div class="main">
+ 
+         <div class="table-responsive">
+          <table class="table table-striped">
+
+            <tr>
+              <th>Title</th>
+              <th>Description</th>
+              <th></th>
+            </tr>
+
+            {% for data in dataset %}
+              <tr> 
+                <td>{{ data.title }}</td>
+                <td>{{ data.description }}</td>
+                <td><a href='/Test/update_view/{{ data.pk }}'"> Update</a></td>
+                <td><a href='/Test/delete_view/{{ data.pk }}'"> Delete</a></td>
+              </tr>
+            {% endfor %}
+
+          </table>
+        </div>
+ 
+</div>
+

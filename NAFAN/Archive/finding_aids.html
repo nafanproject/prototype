@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    {% block title %}<title>NAFAN - The National Finding Aid Network</title>{% endblock %}
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+
+    <!-- Add additional CSS in static file -->
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'site.css' %}"/>
+
+    <script type="text/javascript">
+      NAFAN = {};
+      NAFAN.DefaultID = -1;
+    </script>
+ 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">  </script> 
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>    
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"rel="stylesheet" type="text/css" />  
+
+</head>
+
+<body>
+
+<div class="container_fluid">
+
+  <div class="row top-buffer">
+
+      <div class="col-sm-2">
+        {% if user_type == "contributor_admin" %}
+           <a href="/contributor_admin">Admin</a>
+        {% else %}
+           <a href="/nafan_admin">Admin</a>
+        {% endif %}
+      </div>
+
+      <div class="col-sm-8">
+         <h2 class="page-header text-center">Finding Aids</h2>
+      </div>
+
+      <div class="col-sm-2">
+          <button class="btn btn-md btn-primary float-right" type="button" onclick="location.href='/logout'">Logout</button>
+      </div>
+      
+  </div>
+
+	<div class="row justify-content-center">
+    
+    <div class="col-12 col-md-10 col-lg-8">
+
+      <p>List the finding aids associated with a specific repository.  The contributor can search across several fields to find a finding aid.
+        The title seems an obvious search term.  Others can be added as appropriate.  The right side allows the result to be further filtered.
+        Currently Active and Inactive aids can be filtered.  No reason other filters couldn't be added.</p>
+
+      <p>Likely need a preview option here or on the edit page.</p>
+
+      <br/>
+      <h3>{{ repository_name }}</h3>
+      <br/>
+    </div>
+
+    <div class="row">
+
+    <div class="col-md-6">
+
+        <div class="form_field_container" id="search_area">
+          <select class="form-control medium_field manage_search" id="search_field" name="search_field">
+            <option value="title">Title</option>
+            <option value="reference_code">Reference Code</option>
+            <option value="date">Date</option>
+          </select>
+          <input type="text" class="form-control manage_search medium_field" id="search_term">
+          <button type="button" class="btn btn-primary manage_search" id="search"><span class="fa fa-search" aria-hidden="true"></span> Search</button>
+        </div>
+
+    </div>
+
+    <div class="col-md-6">
+
+        <div class="form_field_container float-lg-right" id="new_button_area">
+          <select class="form-control medium_field manage_search" id="status_filter" name="status_filter">
+            <option value="ALL">All Finding Aids</option>
+            <option value="ACTIVE">Active Finding Aids</option>
+            <option value="INACTIVE">Inactive Finding Aids</option>
+          </select>
+          <div class="button_container">
+            <button type="button" class="btn btn-primary manage_search" id="new" onclick="location.href='/Admin/findingaid_new'"><span class="fal fa-ticket-alt icon_spacer"></span> New Finding Aid</button>
+          </div>
+        </div>
+
+    </div>
+
+  <div class="col-sm-12">
+
+      <br/>
+      <div class="table-responsive">
+        <table class="table table-striped">
+
+          <tr>
+            <th>Title</th>
+            <th>Reference Code</th>
+            <th>Date</th>
+            <th></th>
+          </tr>
+
+          {% for item in returned_aids %}
+            <tr> 
+              <td>{{ item.title }}</td>
+              <td>{{ item.reference_code }}</td>
+              <td>{{ item.date }}</td>
+              <td><button type="button" class="btn btn-primary manage_button edit_button" id="edit" onclick="location.href='/Admin/edit_finding_aid?title={{ item.title }}'" ><span class="fal fa-ticket-alt icon_spacer"></span> Edit</button> </td>
+            </tr>
+          {% endfor %}
+
+        </table>
+      </div>
+
+  </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+  $(document).ready(function() {
+
+    {% comment %} GetFindingAids(); {% endcomment %}
+
+  });
+
+function GetFindingAids() {
+
+        $.ajax({
+          url: '/smith/get_repository/',
+          data: {'name' : ui.item.label},
+          dataType: 'json',
+          success: function (data) {
+            // Really hating the way Django is returning objects
+            var repository = data[0].fields;
+            NAFAN.SelectedRepositories = NAFAN.SelectedRepositories + repository.repository_name + "; ";
+            {% comment %} $('#sel').text(NAFAN.SelectedRepositories); {% endcomment %}
+
+            $('#repository_name').val(repository.repository_name);
+            $('#parent_organization').val(repository.parent_organization);
+            $('#repository_type').val(repository.repository_type);
+            $('#address').val(repository.street_address_1);
+            $('#city').val(repository.st_city);
+            $('#state').val(repository.state);
+            $('#zip').val(repository.st_zip_code_5_numbers);
+
+            $('#edit_area').show();            
+
+            $('#tags').val("");
+          }
+        });
+
+}
+
+
+</script>

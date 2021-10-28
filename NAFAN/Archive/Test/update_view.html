@@ -1,0 +1,16 @@
+
+<div class="main">
+    <!-- Create a Form -->
+    <form method="POST">
+        <!-- Security token by Django -->
+        {% csrf_token %}
+ 
+        <!-- form as paragraph -->
+        {% comment %} {{ form.as_p }} {% endcomment %}
+        {{ form.title }}        
+        {{ form.description }} 
+        <input type="submit" value="Update">
+        <a href="/FindingAids/finding_aids">Cancel </a>
+    </form>
+ 
+</div>
