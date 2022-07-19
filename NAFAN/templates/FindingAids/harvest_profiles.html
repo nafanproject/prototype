@@ -174,13 +174,13 @@ button.manage_button {
             {% if user_type == "contributor_admin" %}
             <a href="/contributor_admin">Admin</a>
             {% else %}
-            <a href="/Repositories/repositories">Repositories</a>
+            <a href="/FindingAids/finding_aids/{{ repository_id }}">Finding Aids</a>
             {% endif %}
             {% endif %}
         </div>
 
         <div class="col-sm-8">
-            <h2 class="page-header text-center"> {{ repository_name }} Finding Aids</h2>
+            <h2 class="page-header text-center"> {{ repository_name }} Harvest Profiles</h2>
         </div>
 
         <div class="col-sm-2">
@@ -189,108 +189,16 @@ button.manage_button {
       
     </div>
 
-    <div class="row grid-buffer">
-
-        <div class="col-sm-12">
-
-          <div class="form_field_container">
-          
-            {% if user_type != "nafan_admin" %}
-
-              {% if repositories.count > 1 %}
-              <label class="form_label"> Repository</label>
-              <select id="repository">
-                {% for data in repositories %}
-                  {% if data.repository_name == repository_name  %}
-                    <option value="{{ data.repository_id }}" selected>{{ data.repository_name }}</option>
-                  {% else %}
-                    <option value="{{ data.repository_id }}">{{ data.repository_name }}</option>
-                  {% endif %}
-                {% endfor %}
-
-              </select>
-            {% endif %}
-
-            {% endif %}
-          </div>
-              </div>
-
-    </div>
-
     {% if user_type != "nafan_admin" %}
 
     <div class="row grid-buffer">
 
         <div class="col-sm-4">
-          <select id="aid_format">
-                  <option value="0">Select a Creation Method</option>
-                  <option value="2">Online Creation Form</option>
-                  <option value="3">Upload EAD</option>
-                  <option value="4">Upload MARC</option>
-                  <option value="5">Upload PDF</option>
-                  <option value="6">Upload HTML with Schema.org</option>
-            </select>
-          <button class="btn btn-md btn-primary" type="button" onclick="location.href='/FindingAids/new_aid'">Create</button>
+          <button class="btn btn-md btn-primary" type="button" onclick="location.href='/FindingAids/create_harvest_profile'">Create New Profile</button>
         </div>
 
-        <div class="col-sm-2">
+        <div class="col-sm-8">        
         </div>
-        
-        <div class="col-sm-2">
-
-        </div>
-
-
-        <div class="col-sm-2">
-            <a href="/FindingAids/aid_profile" class="float-right">Finding Aid Defaults</a>
-        </div>
-
-        <div class="col-sm-2">
-            <a href="/FindingAids/harvest_profiles" class="float-right">Harvest Profiles</a>
-        </div>
-
-
-{% comment %} 
-            {% if user_type != "nafan_admin" %}
-              <div class="form_field_container float-right">
-
-                <button class="btn btn-md btn-primary float-right" type="button" onclick="location.href='/logout'">Create Aid</button>
-
-                <label class="form_label"> Create a new finding aid</label>
-                <select id="format">
-                  <option value="0">Select a format</option>
-                  <option value="1">Minimal</option>
-                  <option value="2">DACS</option>
-                  <option value="3">EAD</option>
-                  <option value="4">MARC</option>
-                  <option value="5">PDF</option>
-                  <option value="6">Schema.org</option>
-                </select>
-              </div>
-            {% endif %}
-
-        </div>
-
-        <div class="col-sm-2">
-
-            {% if user_type != "nafan_admin" %}
-              <div class="form_field_container float-right"> 
-        <div class="col-sm-2">
-
-                <button class="btn btn-md btn-primary float-right" type="button" onclick="location.href='/logout'">Harvest Aids</button>
-
-                <label class="form_label"> Harvest</label>
-                <select id="harvest">
-                  <option value="0">Select a method</option>
-                  <option value="1">Directory</option>
-                  <option value="2">Sitemap</option>
-                  <option value="3">OAI</option>
-                  <option value="4">ArchivesSpace</option>
-                </select> 
-              </div>
-            {% endif %}
-
-        </div> {% endcomment %}
 
     </div>
   {% endif %}
@@ -301,27 +209,23 @@ button.manage_button {
             <table class="table table-striped">
 
                 <tr>
-                    <th>Title</th>
-                    <th>Last Update</th>
-                    <th>Updated By<th>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Type</th>
+                    <th>Format</th>
                     <th></th>
-            {% if user_type != "nafan_admin" %}
                     <th></th>
-            {% endif %}
                 </tr>
 
-            {% for data in dataset %}
+            {% for data in profiles %}
               <tr> 
-                <td>{{ data.title }}</td>
-                <td>{{ data.last_update }}</td>
-                <td>{{ data.updated_by }}</td>
-            {% if user_type != "nafan_admin" %}
-                <td><a href='/FindingAids/update_aid/{{ data.pk }}'"> Edit</a></td>
-                <td><a href='/FindingAids/delete_aid/{{ data.pk }}'"> Delete</a></td>
-            {% else %}
-                <td><a href='/FindingAids/view_aid/{{ data.pk }}'"> View</a></td>
-            {% endif %}
-              </tr>
+                <td>{{ data.harvest_name }}</td>
+                <td>{{ data.harvest_location }}</td>
+                <td>{{ data.harvest_type }}</td>
+                <td>{{ data.default_format }}</td>
+                <td><a href='/FindingAids/edit_harvest_profile/{{ data.pk }}'"> Edit</a></td>
+                <td><a href='/FindingAids/delete_harvest_profile/{{ data.pk }}'"> Delete</a></td>
+                </tr>
             {% endfor %}
 
           </table>

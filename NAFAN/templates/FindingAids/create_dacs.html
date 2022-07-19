@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    {% block title %}<title>NAFAN - The National Finding Aid Network</title>{% endblock %}
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+
+    <!-- Add additional CSS in static file -->
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'site.css' %}"/>
+
+     <style>
+
+
+.page-header {
+    color: #5cb85c;
+  }
+
+.message {
+  color: cadetblue;
+}
+
+.top-buffer { 
+  margin-top:20px; 
+  margin-bottom:10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.grid-buffer { 
+  margin-bottom:10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+#id_username,
+#id_password {
+  width: 300px;
+}
+
+ul {
+  list-style-type: none;
+}
+
+select {
+  border:1px solid #ccc;
+  vertical-align:top;
+  height:30px;
+}
+
+.manage_page_container {
+  margin: 0 0 20px 0;
+  padding: 0;
+  display: block;
+  overflow: hidden;
+}
+
+.background_content {
+  background-color: #ffff;
+  /* border: 1px solid #ced4da; */
+}
+
+h3.section_title {
+  font-family: "Open Sans", Helvetica, Arial, san-serif;
+  font-size: 30px;
+  color:#5cb85c;
+  display: inline-block;
+  margin: 10px 0 15px 0;
+  padding: 0;
+}
+
+svg.icon_spacer {
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.form_field_container {
+  margin: 0 0 10px 0;
+  display:block;
+  overflow:hidden;
+}
+
+label.form_label {
+  width: auto;
+  font-weight: 600;
+  margin: 5px 10px 0 0;
+  display: block;
+  overflow: hidden;
+}
+
+input.medium_field,
+select.medium_field {
+  width: 200px !important;
+}
+
+input.large_field,
+select.large_field {
+  width: 300px !important;
+}
+
+input.ex_large_field,
+select.ex_large_field {
+  width: 500px !important;
+}
+
+input.manage_search {
+  float: left;
+  width: 300px;
+  margin: 0 10px, 0 0;
+}
+
+select.manage_search {
+  float: left;
+  margin: 0 20px, 0 0;
+}
+
+button.manage_search {
+  float: left;
+  background-color: #2371c3;
+  border-color: #2371c3;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin: 0;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+input.search_field {
+  height: 30px;
+  border-right: none;
+}
+
+.button_container {
+  display: inline-block;
+  overflow: hidden;
+  margin: 0 0 0, 20px;
+  padding: 0;
+}
+
+button.manage_button {
+  float: left;
+  margin-right: 10px;
+  display: block;
+  overflow: hidden;
+}
+
+.field_caption {
+  color: cadetblue;
+}
+    </style>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">  </script> 
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>    
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"rel="stylesheet" type="text/css" />  
+
+</head>
+
+<body>
+
+<div class="container_fluid">
+
+    <div class="row top-buffer">
+
+        <div class="col-sm-2">
+            <a href="/FindingAids/finding_aids/{{ repository_id }}">Finding Aids</a>
+        </div>
+
+        <div class="col-sm-8">
+            <h2 class="page-header text-center"> Finding Aid Edit </h2>
+        </div>
+
+        <div class="col-sm-2">
+            <button class="btn btn-md btn-primary float-right" type="button" onclick="location.href='/logout'">Logout</button>
+        </div>
+      
+    </div>
+
+    <div class="row grid-buffer">
+      <div class="col-sm">
+        <div class="form_field_container">
+          <label class="form_label">Repository (name and location): &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Repository" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://saa-ts-dacs.github.io/dacs/06_part_I/03_chapter_02/02_name_and_location_of_repository.html" target="_blank">DACS</a></label>
+            {{ form.repository }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Create a Form -->
+    <form method="POST">
+      {% csrf_token %}
+
+      <div class="row grid-buffer">
+
+        <!-- Security token by Django -->
+
+        <div class="col-sm-12">
+
+          <details open>
+            <summary class="message">Required Information</summary>
+
+              <div class="form_field_container">
+                <label class="form_label"> Title: &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Title" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://saa-ts-dacs.github.io/dacs/06_part_I/03_chapter_02/03_title.html" target="_blank">DACS</a></label>
+                {{ form.title }}
+              </div>
+
+              <div class="form_field_container">
+                <label class="form_label"> Description (scope and content): &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Description" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://saa-ts-dacs.github.io/dacs/06_part_I/04_chapter_03/01_scope_and_content.html" target="_blank">DACS</a></label>
+                {{ form.scope_and_content }}
+              </div>
+
+          </details>
+
+        </div>
+
+      </div>
+
+      <div class="row grid-buffer">
+            <div class="col-sm-12">
+
+        <details>
+          <summary class="message">Recommended Information</summary>
+
+          <div class="row grid-buffer">
+            <div class="col-sm-12">
+
+              <div class="form_field_container">
+                <label class="form_label"> Identifier (reference code): &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Identifier" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://saa-ts-dacs.github.io/dacs/06_part_I/03_chapter_02/01_reference_code.html" target="_blank">DACS</a></label>
+                {{ form.reference_code }}
+                <span class="field_caption"></span>
+              </div>
+
+              <div class="form_field_container">
+                <label class="form_label"> Material Dates (date): &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Dates" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://saa-ts-dacs.github.io/dacs/06_part_I/03_chapter_02/04_date.html" target="_blank">DACS</a></label>
+                {{ form.date }}
+                <span class="field_caption"></span>
+              </div>
+              
+              <div class="form_field_container">
+                <label class="form_label"> Physical nature of materials (extent): &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Extent" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://saa-ts-dacs.github.io/dacs/06_part_I/03_chapter_02/05_extent.html" target="_blank">DACS</a></label>
+                {{ form.extent }}
+                <span class="field_caption"></span>
+              </div>
+
+              <div class="form_field_container">
+                <label class="form_label"> Conditions governing reproduction: &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Reproduction Conditions" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://saa-ts-dacs.github.io/dacs/06_part_I/05_chapter_04/04_conditions_governing_reproduction_and_use.html" target="_blank">DACS</a></label>
+                {{ form.rights }}
+                <span class="field_caption"></span>
+              </div>
+          
+              <div class="form_field_container">
+                <label class="form_label"> Conditions governing access: &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Access Conditions" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://saa-ts-dacs.github.io/dacs/06_part_I/09_chapter_08/02_rights_statements_archival_description.html" target="_blank">DACS</a></label>
+                {{ form.governing_access }}
+                <span class="field_caption"></span>
+              </div>
+
+              <div class="form_field_container">
+                <label class="form_label"> Creative Commons: &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Creative Commons" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://creativecommons.org/about/cclicenses/" target="_blank">Creative Commons</a></label>
+                {{ form.creative_commons }}
+                <span class="field_caption"></span>
+              </div>
+
+              <div class="form_field_container">
+                <label class="form_label">Creators: &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Access Creators" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://saa-ts-dacs.github.io/dacs/06_part_I/03_chapter_02/06_name_of_creators.html" target="_blank">DACS</a></label>
+                {{ form.creator }}
+                <span class="field_caption"></span>
+              </div>
+
+              <div class="form_field_container">
+                <label class="form_label">Languages: &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Access Languages" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://saa-ts-dacs.github.io/dacs/06_part_I/05_chapter_04/05_languages_and_scripts_of_the_material.html" target="_blank">DACS</a></label>
+                {{ form.languages }}
+                <span class="field_caption"></span>
+              </div>
+
+            </div>
+          </div>
+          </div>
+
+        </details>
+
+      </div>
+
+      <div class="row grid-buffer">
+
+          <div class="col-sm-12">
+      
+            <details>
+              <summary class="message">Advanced Information</summary>
+
+                  <div class="form_field_container">
+                    <label class="form_label">Repository Link: &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Repository Link" target="_blank">?</a></label>
+                    {{ form.repository_link }}
+                    <span class="field_caption"></span>
+                  </div>
+
+                  <div class="form_field_container">
+                    <label class="form_label">Digital Link: &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Digital Link" target="_blank">?</a></label>
+                    {{ form.digital_link }}
+                    <span class="field_caption"></span>
+                  </div>
+
+                  <div class="form_field_container">
+                    <label class="form_label">Subject Headers: &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Subject Headers" target="_blank">?</a></label>
+                    <input type="text" id="subject_header" name="subject_header">
+                    <button type="button" id="add_subject_header" class="assign btn btn-primary" > Add Subject Header</a>
+                  </div>
+
+                  <div class="row justify-content-center grid-buffer">
+                
+                        <div class="table-responsive top-buffer">
+                            <table class="table table-striped">
+
+                                <tr>
+                                    <th>Subject Header</th>
+                                    <th></th>
+                                </tr>
+
+                            {% for data in subject_headers %}
+                              <tr> 
+                                <td>{{ data.subject_header }}</td>
+                                <td><a href='/FindingAids/delete_subject_header/{{ data.pk }}'"> Delete</a></td>
+                              </tr>
+                            {% endfor %}
+
+                          </table>
+                        </div>
+                  </div>
+
+            </details>
+
+        </div>
+
+      </div>
+
+      <div class="row grid-buffer">
+
+        <div class="col-sm">
+
+          <div class="form_field_container">
+            <label class="form_label">Revision Notes:</label>
+            {{ form.revision_notes }}
+          </div>
+
+          <input type="submit" value="Submit">
+          <span>&nbsp;&nbsp;</span>
+          <a href='/FindingAids/finding_aids/{{ repository_id }}'>Cancel </a>
+
+        </div>
+  
+      </div>
+
+    </form>
+
+    <div class="row grid-buffer">
+
+</div>
+
+<script>
+
+$('#add_subject_header').click(function () {
+
+  var subject_header = $('#subject_header').val();
+
+  var aid_id = {{finding_aid_id}}
+
+  $.ajax({
+    url: '/ajax/add_subject_header/',
+    data: {'aid_id': aid_id, 'subject_header': subject_header},
+    dataType: 'json',
+    success: function (data) {
+      location.reload();
+    }
+  });
+
+})
+
+</script>
+
+</body>
+
+</html>
