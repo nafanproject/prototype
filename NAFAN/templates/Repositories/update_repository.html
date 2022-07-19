@@ -11,8 +11,148 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" rel="stylesheet">
 
     <!-- Add additional CSS in static file -->
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'site.css' %}"/>
+    {% comment %} {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'site.css' %}"/> {% endcomment %}
+
+     <style>
+
+
+.page-header {
+    color: #5cb85c;
+  }
+
+.message {
+  color: cadetblue;
+}
+
+.top-buffer { 
+  margin-top:20px; 
+  margin-bottom:10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.grid-buffer { 
+  margin-bottom:10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+#id_username,
+#id_password {
+  width: 300px;
+}
+
+ul {
+  list-style-type: none;
+}
+
+select {
+  border:1px solid #ccc;
+  vertical-align:top;
+  height:30px;
+}
+
+.manage_page_container {
+  margin: 0 0 20px 0;
+  padding: 0;
+  display: block;
+  overflow: hidden;
+}
+
+.background_content {
+  background-color: #ffff;
+  /* border: 1px solid #ced4da; */
+}
+
+h3.section_title {
+  font-family: "Open Sans", Helvetica, Arial, san-serif;
+  font-size: 30px;
+  color:#5cb85c;
+  display: inline-block;
+  margin: 10px 0 15px 0;
+  padding: 0;
+}
+
+svg.icon_spacer {
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.form_field_container {
+  margin: 0 0 10px 0;
+  display:block;
+  overflow:hidden;
+}
+
+label.form_label {
+  width: auto;
+  font-weight: 600;
+  margin: 5px 10px 0 0;
+  display: block;
+  overflow: hidden;
+}
+
+input.medium_field,
+select.medium_field {
+  width: 200px !important;
+}
+
+input.large_field,
+select.large_field {
+  width: 300px !important;
+}
+
+input.ex_large_field,
+select.ex_large_field {
+  width: 500px !important;
+}
+
+input.manage_search {
+  float: left;
+  width: 300px;
+  margin: 0 10px, 0 0;
+}
+
+select.manage_search {
+  float: left;
+  margin: 0 20px, 0 0;
+}
+
+button.manage_search {
+  float: left;
+  background-color: #2371c3;
+  border-color: #2371c3;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin: 0;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+input.search_field {
+  height: 30px;
+  border-right: none;
+}
+
+.button_container {
+  display: inline-block;
+  overflow: hidden;
+  margin: 0 0 0, 20px;
+  padding: 0;
+}
+
+button.manage_button {
+  float: left;
+  margin-right: 10px;
+  display: block;
+  overflow: hidden;
+}
+
+.field_caption {
+  color: cadetblue;
+}
+    </style>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">  </script> 
@@ -29,9 +169,9 @@
 
         <div class="col-sm-2">
             {% if user_type == "contributor_admin" %}
-            <a href="/contributor_admin">Admin</a>
+            <a href="/Admin/contributor_admin">Admin</a>
             {% else %}
-            <a href="/nafan_admin">Admin</a>
+            <a href="/Admin/nafan_admin">Admin</a>
             {% endif %}
         </div>
 
@@ -45,13 +185,17 @@
       
     </div>
 
-    <div class="row justify-content-left grid-buffer">
+    <div class="row justify-content-center grid-buffer">
 
     <!-- Create a Form -->
-    <form method="POST" action="/Repositories/update_repository">
+    <form method="POST">
         <!-- Security token by Django -->
         {% csrf_token %}
  
+        <div class="row">
+
+         <div class="col-md-4">
+
         <div class="form_field_container">
           <label class="form_label">{{ form.repository_name.label_tag }} </label>
           {{ form.repository_name }}
@@ -61,12 +205,6 @@
         <div class="form_field_container">
           <label class="form_label">{{ form.parent_organization.label_tag }} </label>
           {{ form.parent_organization }}
-          <span class="field_caption"></span>
-        </div>
-
-        <div class="form_field_container">
-          <label class="form_label">{{ form.repository_type.label_tag }} </label>
-          {{ form.repository_type }}
           <span class="field_caption"></span>
         </div>
 
@@ -89,12 +227,107 @@
         </div>
 
         <div class="form_field_container">
-          <label class="form_label">{{ form.st_zip_code_5_numbers.label_tag }} </label>
+          <label class="form_label">Zip code </label>
           {{ form.st_zip_code_5_numbers }}
           <span class="field_caption"></span>
         </div>
 
+        </div>
+        <div class="col-md-4">
 
+        <div class="form_field_container">
+          <label class="form_label">{{ form.url.label_tag }} </label>
+          {{ form.url }}
+          <span class="field_caption"></span>
+        </div>
+
+        <div class="form_field_container">
+          <label class="form_label">{{ form.email.label_tag }} </label>
+          {{ form.email }}
+          <span class="field_caption"></span>
+        </div>
+
+        <div class="form_field_container">
+          <label class="form_label">{{ form.phone.label_tag }} </label>
+          {{ form.phone }}
+          <span class="field_caption"></span>
+        </div>
+        
+        <div class="form_field_container">
+          <label class="form_label">{{ form.description.label_tag }} </label>
+          {{ form.description }}
+          <span class="field_caption"></span>
+        </div>
+        
+        </div>
+
+        <div class="col-md-4">
+
+        <div class="form_field_container">
+          <label class="form_label">{{ form.repository_type.label_tag }} </label>
+          {{ form.repository_type }}
+          <span class="field_caption"></span>
+        </div>
+
+        {% comment %} <div class="form_field_container">
+          <label class="form_label">{{ form.status.label_tag }} </label>
+          {{ form.status }}
+          <span class="field_caption"></span>
+        </div>
+ {% endcomment %}
+        <div class="form_field_container">
+          <label class="form_label">{{ form.repository_link.label_tag }} </label>
+          {{ form.repository_link }}
+          <span class="field_caption"></span>
+        </div>
+
+        <div class="form_field_container">
+          <label class="form_label">{{ form.snac_permalink.label_tag }} </label>
+          {{ form.snac_permalink }}
+          <span class="field_caption"></span>
+        </div>
+
+        <div class="form_field_container">
+          <label class="form_label">{{ form.DPLA.label_tag }} </label>
+          {{ form.DPLA }}
+          <span class="field_caption"></span>
+        </div>
+
+        <div class="form_field_container">
+          <label class="form_label">{{ form.latitude.label_tag }} </label>
+          {{ form.latitude }}
+          <span class="field_caption"></span>
+        </div>
+
+        <div class="form_field_container">
+          <label class="form_label">{{ form.longitude.label_tag }} </label>
+          {{ form.longitude }}
+          <span class="field_caption"></span>
+        </div>
+
+        {% comment %} <div class="form_field_container">
+          <label class="form_label">{{ form.harvest_location.label_tag }} </label>
+          {{ form.harvest_location }}
+          <span class="field_caption"></span>
+        </div>
+
+        <div class="form_field_container">
+          <label class="form_label">{{ form.governing_access.label_tag }} </label>
+          {{ form.governing_access }}
+          <span class="field_caption"></span>
+        </div> {% endcomment %}
+        
+        {% comment %} <div class="form_field_container">
+          <label class="form_label">Repository notes </label>
+          {{ form.notes }}
+          <span class="field_caption"></span>
+        </div> {% endcomment %}
+        
+        </div>
+
+        </div>
+
+        <br/>
 
         <input type="submit" value="Update">
         <a href="/Repositories/repositories">Cancel </a>

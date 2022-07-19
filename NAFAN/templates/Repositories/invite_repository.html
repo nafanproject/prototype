@@ -11,15 +11,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" rel="stylesheet">
 
     <!-- Add additional CSS in static file -->
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'NAFAN/site.css' %}"/>
+    {% comment %} {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'site.css' %}"/> {% endcomment %}
 
-    <script type="text/javascript">
-      NAFAN = {};
-      NAFAN.DefaultID = -1;
-    </script>
- 
-      <style>
+     <style>
 
 
 .page-header {
@@ -158,7 +153,7 @@ button.manage_button {
   color: cadetblue;
 }
     </style>
-    
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">  </script> 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>    
@@ -168,36 +163,72 @@ button.manage_button {
 
 <body>
 
-<div class="container-fluid">
+<div class="container_fluid">
 
-  <div class="row top-buffer">
+    <div class="row top-buffer">
 
-      <div class="col-sm-2">
-          <button class="btn btn-md btn-primary float-left" type="button" onclick="location.href='/'">Home</button>
-          <button class="btn btn-md btn-primary float-left" type="button" onclick="location.href='/NAFANAdmin'">Admin</button>
-      </div>
+        <div class="col-sm-2">
+            {% if user_type == "contributor_admin" %}
+            <a href="/contributor_admin">Admin</a>
+            {% else %}
+            <a href="/nafan_admin">Admin</a>
+            {% endif %}
+        </div>
 
-      <div class="col-sm-8">
-        <h2 class="page-header text-center">TraceLog</h2>
-      </div>
+        <div class="col-sm-8">
+            <h2 class="page-header text-center"> Invite Repository {{ repository_name }}</h2>
+        </div>
 
-      <div class="col-sm-2">
-          <button class="btn btn-md btn-primary float-right" type="button" onclick="location.href='/logout'">Logout</button>
-      </div>
-
-  <div class="row">
-
-    <div class="col-sm-12"> 
-
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Upload</button>
-      </form>
+        <div class="col-sm-2">
+            <button class="btn btn-md btn-primary float-right" type="button" onclick="location.href='/logout'">Logout</button>
+        </div>
       
     </div>
-  </div>
-</div>
 
-</body>
-</html>
+    <div class="row top-buffer">
+
+        <div class="col-sm-2">
+          <p>&nbsp;</p>
+        </div>
+
+        <div class="col-sm-8">
+            <p class="text-left"> Here there would be a prefilled form with the repository's information set to send an email to the
+            contact email for the repository.  A text area would be provided to personalize the email.</p>
+
+            <div class="row">
+
+              <div class="col-sm-12">
+            
+                <div class="form_field_container">
+                    <label class="form_label"> To: </label>
+                    {{ contact }}
+                </div>
+        
+                <div class="form_field_container">
+                    <label class="form_label"> Subject: </label>
+                    <input type="text" placeholder="{{ subject }}" />
+                </div>
+        
+                <div class="form_field_container">
+                    <label class="form_label"> Message: </label>
+                    <input type="text" />
+                </div>
+
+            </div>
+
+            <input type="submit" value="Invite">
+            <a href="/Repositories/repositories">Cancel </a>
+        </div>
+
+        <div class="col-sm-2">
+          <p>&nbsp;</p>
+        </div>
+        <br/>
+
+ 
+      
+    </div>
+
+</div>
+</div>
+</div>
