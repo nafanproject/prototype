@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -166,96 +165,94 @@ button.manage_button {
 
 <body>
 
-<div class="container-fluid">
+<div class="container_fluid">
 
-    <div class="row top-buffer">
+  <div class="row top-buffer">
 
       <div class="col-sm-4">
-          <a href="/joinus">Join us</a>
+          <a href="/newToNAFAN"></a>
       </div>
 
-      {% comment %} <div class="col-sm-4">
-          <a href="/newToNAFAN">New to NAFAN?</a>
-      </div> {% endcomment %}
-
-      {% comment %} <div class="col-sm-2">
-          <a href="/organizations">Organizations</a>
-      </div> {% endcomment %}
-
       <div class="col-sm-4">
-        <h2 class="page-header text-center">Welcome to NAFAN</h2>
+        <h2 class="page-header text-center">Join Us</h2>
       </div>
 
-      {% comment %} <div class="col-sm-2">
-          <a class="float-right" href="/contact">Contact Us</a>
-      </div> {% endcomment %}
-      
       <div class="col-sm-4">
-          <a class="float-right" href="/nafanlogin">Login</a>
+          <a class="float-right" href="/">Main</a>
       </div>
       
-    </div>
-    
-	<div class="row justify-content-center">
-    {% comment %} <div class="col-6 col-md-10 col-lg-8">
-      <img src="https://www.montaguemiller.com/shared/fs/0294/029400170/greenecountyva.jpg" alt="Spotlight" height="200" width="300">
-      <br/>
-      <br/>
-    </div>
-
-    <div class="col-6 col-md-10 col-lg-8">
-
-      <p>Spotlight on <a href="https://greenehistoryva.org/" target="_blank">Greene County Historical Society</a></p>
-      <p></p>
-      <p><a href="/spotlights">previous spotlights</a></p>
-      <p></p>
-
-    </div> {% endcomment %}
-
-    <div class="col-12 col-md-10 col-lg-8">
-            <form class="card card-sm" action="{% url 'home' %}" method="get">
-                <div class="card-body row no-gutters align-items-center">
-                    <div class="col-auto">
-                        <i class="fas fa-search h4 text-body"></i>
-                    </div>
-                    <div class="col">
-                        <input class="form-control form-control-lg form-control-borderless" name="searchTerm" type="search" placeholder="Search archives">
-                    </div>
-                </div>
-            </form>
-
-            {% if search_term  %}
-
-                <p></p>
-                <p>Searched for: <strong>{{ search_term }}</strong></p>
-
-                {% for data in response %}
-                    {% if data.repository_type == "repository" %}
-                      <h3>Repository level description for: <a href='/Repository_Info/{{ data.repository }}'>{{ data.repository }}</a></h3>
-                      <h4>{{ data.title }}</h4>
-                      <p>{{ data.content | safe }}</p>
-                      <p><a href='/Browse_Repository_Entries/{{ data.finding_aid_id }}'>Browse Repository</a></p>
-                    {% else %}
-                      <h3>Repository: <a href='/Repository_Info/{{ data.repository }}'>{{ data.repository }}</a></h3>
-                      <h4>{{ data.title }}</h4>
-                      <p>{{ data.content | safe  }}</p>
-                      <p><a href='/view_aid_public/{{ data.finding_aid_id }}'>View Details</a>&nbsp;&nbsp;<a href='/Browse_Repository/{{ data.finding_aid_id }}'>Browse Repository</a></p>
-                    {% endif %}
-                    
-                {% endfor %}
-
-            {% else %}
-
-            <div id="index_notes">
-            </div>
-
-            {% endif %}
-    </div>
   </div>
 
-    <footer>
-        <p></p>
-    </footer>
+	<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+
+        <div id="index_notes">
+            <p></p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor 
+            in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, 
+            sunt in culpa qui officia deserunt mollit anim id est laborum.
+            </p>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+              <h3 class="message">{{ message }}</h3>
+              <br/>
+            {% endfor %}
+        {% else %}
+
+        <form action="/joinus/" method="post">
+
+          {% csrf_token %}
+    
+            <div class="row">
+
+              <div class="col-sm-12">
+            
+                <div class="form_field_container">
+                    <label class="form_label">Name: </label>
+                    {{ form.full_name }}
+                </div>
+        
+                <div class="form_field_container">
+                    <label class="form_label">{{ form.email.label_tag }} </label>
+                    {{ form.email }}
+                </div>
+
+                <div class="form_field_container">
+                    <label class="form_label">{{ form.phone.label_tag }} </label>
+                    {{ form.phone }}
+                </div>
+
+                <div class="form_field_container">
+                    <label class="form_label">Organization's website: </label>
+                    {{ form.url }}
+                </div>
+
+                <div class="form_field_container">
+                    <label class="form_label">Please provide a brief summary of the scope of your collection guides: </label>
+                    {{ form.collection_guides }}
+                </div>
+
+                <div class="form_field_container">
+                    <label class="form_label">Additional message for NAFAN: </label>
+                    {{ form.message }}
+                </div>
+
+                <br/>
+                <button type="submit" class="btn btn-primary manage_button" id="submit"><span class="fal fa-ticket-alt icon_spacer"></span> Submit</button>
+                <br/>
+       
+            </div>
+      
+        </form>
+        {% endif %}
+
+    </div>
+  </div>
+    
 </div>
+
 </body>
 </html>

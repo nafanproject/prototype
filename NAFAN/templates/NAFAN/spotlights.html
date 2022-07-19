@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -166,96 +165,51 @@ button.manage_button {
 
 <body>
 
-<div class="container-fluid">
+<div class="container_fluid">
 
-    <div class="row top-buffer">
+  <div class="row top-buffer">
 
-      <div class="col-sm-4">
-          <a href="/joinus">Join us</a>
-      </div>
-
-      {% comment %} <div class="col-sm-4">
+      <div class="col-sm-2">
           <a href="/newToNAFAN">New to NAFAN?</a>
-      </div> {% endcomment %}
-
-      {% comment %} <div class="col-sm-2">
-          <a href="/organizations">Organizations</a>
-      </div> {% endcomment %}
-
-      <div class="col-sm-4">
-        <h2 class="page-header text-center">Welcome to NAFAN</h2>
       </div>
 
-      {% comment %} <div class="col-sm-2">
+      <div class="col-sm-2">
+          <a href="/organizations">Find Organizations</a>
+      </div>
+
+      <div class="col-sm-4">
+        <h2 class="page-header text-center">Spotlights</h2>
+      </div>
+
+      <div class="col-sm-2">
           <a class="float-right" href="/contact">Contact Us</a>
-      </div> {% endcomment %}
-      
-      <div class="col-sm-4">
-          <a class="float-right" href="/nafanlogin">Login</a>
       </div>
       
-    </div>
-    
-	<div class="row justify-content-center">
-    {% comment %} <div class="col-6 col-md-10 col-lg-8">
-      <img src="https://www.montaguemiller.com/shared/fs/0294/029400170/greenecountyva.jpg" alt="Spotlight" height="200" width="300">
-      <br/>
-      <br/>
-    </div>
-
-    <div class="col-6 col-md-10 col-lg-8">
-
-      <p>Spotlight on <a href="https://greenehistoryva.org/" target="_blank">Greene County Historical Society</a></p>
-      <p></p>
-      <p><a href="/spotlights">previous spotlights</a></p>
-      <p></p>
-
-    </div> {% endcomment %}
-
-    <div class="col-12 col-md-10 col-lg-8">
-            <form class="card card-sm" action="{% url 'home' %}" method="get">
-                <div class="card-body row no-gutters align-items-center">
-                    <div class="col-auto">
-                        <i class="fas fa-search h4 text-body"></i>
-                    </div>
-                    <div class="col">
-                        <input class="form-control form-control-lg form-control-borderless" name="searchTerm" type="search" placeholder="Search archives">
-                    </div>
-                </div>
-            </form>
-
-            {% if search_term  %}
-
-                <p></p>
-                <p>Searched for: <strong>{{ search_term }}</strong></p>
-
-                {% for data in response %}
-                    {% if data.repository_type == "repository" %}
-                      <h3>Repository level description for: <a href='/Repository_Info/{{ data.repository }}'>{{ data.repository }}</a></h3>
-                      <h4>{{ data.title }}</h4>
-                      <p>{{ data.content | safe }}</p>
-                      <p><a href='/Browse_Repository_Entries/{{ data.finding_aid_id }}'>Browse Repository</a></p>
-                    {% else %}
-                      <h3>Repository: <a href='/Repository_Info/{{ data.repository }}'>{{ data.repository }}</a></h3>
-                      <h4>{{ data.title }}</h4>
-                      <p>{{ data.content | safe  }}</p>
-                      <p><a href='/view_aid_public/{{ data.finding_aid_id }}'>View Details</a>&nbsp;&nbsp;<a href='/Browse_Repository/{{ data.finding_aid_id }}'>Browse Repository</a></p>
-                    {% endif %}
-                    
-                {% endfor %}
-
-            {% else %}
-
-            <div id="index_notes">
-            </div>
-
-            {% endif %}
-    </div>
+      <div class="col-sm-2">
+          <a class="float-right" href="/">Main</a>
+      </div>
+      
   </div>
 
-    <footer>
-        <p></p>
-    </footer>
+	<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+
+        <p>Here we can list previous spotlighted organizations as well as cohorts.  Cohorts are the idea that
+           organizations can form a cluster of like-minded repositories within NAFAN for mutual assistance and
+           promotion.  NAFAN can provide structures to encourage this such as the spotlight or specialized
+           listserve capabilities.</p>
+        <div id="index_notes">
+            <p></p>
+            <p><a href="https://www.bcri.org/" target="_blank">Birmingham Civil Rights Institute</a></p>
+            <p><a href="https://densho.org/" target="_blank">Densho</</a></p>
+            <p><a href="https://www.lahistoriamuseum.org/" target="_blank">La Historia Historical Society Museum</a></p>
+            <p><a href="http://www.mescalerolibrary.org/" target="_blank">Mescalero Community Library</a></p>
+      </div>
+        
+    </div>
+  </div>
+    
 </div>
+
 </body>
 </html>
