@@ -19,6 +19,146 @@
       NAFAN.DefaultID = -1;
     </script>
  
+      <style>
+
+
+.page-header {
+    color: #5cb85c;
+  }
+
+.message {
+  color: cadetblue;
+}
+
+.top-buffer { 
+  margin-top:20px; 
+  margin-bottom:10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.grid-buffer { 
+  margin-bottom:10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+#id_username,
+#id_password {
+  width: 300px;
+}
+
+ul {
+  list-style-type: none;
+}
+
+select {
+  border:1px solid #ccc;
+  vertical-align:top;
+  height:30px;
+}
+
+.manage_page_container {
+  margin: 0 0 20px 0;
+  padding: 0;
+  display: block;
+  overflow: hidden;
+}
+
+.background_content {
+  background-color: #ffff;
+  /* border: 1px solid #ced4da; */
+}
+
+h3.section_title {
+  font-family: "Open Sans", Helvetica, Arial, san-serif;
+  font-size: 30px;
+  color:#5cb85c;
+  display: inline-block;
+  margin: 10px 0 15px 0;
+  padding: 0;
+}
+
+svg.icon_spacer {
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.form_field_container {
+  margin: 0 0 10px 0;
+  display:block;
+  overflow:hidden;
+}
+
+label.form_label {
+  width: auto;
+  font-weight: 600;
+  margin: 5px 10px 0 0;
+  display: block;
+  overflow: hidden;
+}
+
+input.medium_field,
+select.medium_field {
+  width: 200px !important;
+}
+
+input.large_field,
+select.large_field {
+  width: 300px !important;
+}
+
+input.ex_large_field,
+select.ex_large_field {
+  width: 500px !important;
+}
+
+input.manage_search {
+  float: left;
+  width: 300px;
+  margin: 0 10px, 0 0;
+}
+
+select.manage_search {
+  float: left;
+  margin: 0 20px, 0 0;
+}
+
+button.manage_search {
+  float: left;
+  background-color: #2371c3;
+  border-color: #2371c3;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin: 0;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+input.search_field {
+  height: 30px;
+  border-right: none;
+}
+
+.button_container {
+  display: inline-block;
+  overflow: hidden;
+  margin: 0 0 0, 20px;
+  padding: 0;
+}
+
+button.manage_button {
+  float: left;
+  margin-right: 10px;
+  display: block;
+  overflow: hidden;
+}
+
+.field_caption {
+  color: cadetblue;
+}
+    </style>
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">  </script> 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>    
@@ -33,11 +173,7 @@
   <div class="row top-buffer">
 
       <div class="col-sm-2">
-        {% if user_type == "contributor_admin" %}
-           <a href="/contributor_admin">Admin</a>
-        {% else %}
-           <a href="/nafan_admin">Admin</a>
-        {% endif %}
+        <a href="/Users/users">Users</a>
       </div>
 
       <div class="col-sm-8">
@@ -65,29 +201,91 @@
              unless they are already associated with it.
           </p>
 
-    <h3>User: {{ username }}</h3>
+          <h3>User: {{ username }}</h3>
     
-    <p></p>
+          <p></p>
 
-    <span>Add Repository </span><input type="text" class="ex_large_field" id="tags">
+          {% comment %} <span>Add Repository </span><input type="text" class="ex_large_field" id="tags"> {% endcomment %}
 
   </div>
 
   <div class="col-md-12" id="manage_content_area">
 
         <br/>
+        <h3>Assigned Repositories</h3>
         <div class="table-responsive">
-          <table class="table table-striped" id="repository_table">
+          <table class="table table-striped" id="assigned_table">
 
             <tr>
               <th>Repository Name</th>
+              <th>City</th>
+              <th>State</th>
               <th></th>
             </tr>
 
             {% for item in user_repositories %}
               <tr> 
                 <td>{{ item.repository_name }}</td>
+                <td>{{ item.st_city }}</td>
+                <td>{{ item.state }}</td>
                 <td><button type="button" id="{{ item.repository_name }}" class="unassign btn btn-primary" > Unassign</a> </td>
+              </tr>
+            {% endfor %}
+
+          </table>
+        </div>
+
+  </div>
+
+      <form method="get">
+      {% csrf_token %}
+
+        <br/>
+        <div class="row grid-buffer">
+          <h3>Available Repositories</h3>
+        </div>
+
+        <div class="row grid-buffer">
+
+          <div class="col-md-2">
+              <b><span>Find Repository</span></b>
+          </div>
+
+          <div class="col-md-6">
+
+            <div class="form_field_container" id="search_area">
+              <select class="form-control medium_field manage_search" id="search_field" name="search_field">
+                <option value="repository_name">Repository Name</option>
+                <option value="st_city">City</option>
+                <option value="state">State</option>
+              </select>
+              <input type="text" class="form-control manage_search medium_field" id="search_term"  name="search_term">
+              <button type="submit" class="btn btn-primary manage_search" id="search"><span class="fa fa-search" aria-hidden="true"></span> Search</button>
+            </div>
+
+          </div>
+</div>
+      </form>
+
+  <div class="col-md-12" id="manage_content_area">
+
+        <br/>
+        <div class="table-responsive">
+          <table class="table table-striped" id="available_table">
+
+            <tr>
+              <th>Repository Name</th>
+              <th>City</th>
+              <th>State</th>
+              <th></th>
+            </tr>
+
+            {% for item in repositories %}
+              <tr> 
+                <td>{{ item.repository_name }}</td>
+                <td>{{ item.st_city }}</td>
+                <td>{{ item.state }}</td>
+                <td><button type="button" id="{{ item.repository_name }}" class="assign btn btn-primary" > Assign</a> </td>
               </tr>
             {% endfor %}
 
@@ -133,12 +331,27 @@
     })
   });
 
-$('#repository_table').on('click', '.unassign', function () {
+$('#assigned_table').on('click', '.unassign', function () {
 
   var id = $(this).attr('id');
 
   $.ajax({
-    url: '/smith/remove_user_repository/',
+    url: '/ajax/remove_user_repository/',
+    data: {'username': NAFAN.User, 'repository' : id},
+    dataType: 'json',
+    success: function (data) {
+      location.reload();
+    }
+  });
+
+})
+
+$('#available_table').on('click', '.assign', function () {
+
+  var id = $(this).attr('id');
+
+  $.ajax({
+    url: '/ajax/add_user_repository/',
     data: {'username': NAFAN.User, 'repository' : id},
     dataType: 'json',
     success: function (data) {

@@ -14,6 +14,146 @@
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'site.css' %}"/>
 
+    <style>
+
+
+.page-header {
+    color: #5cb85c;
+  }
+
+.message {
+  color: cadetblue;
+}
+
+.top-buffer { 
+  margin-top:20px; 
+  margin-bottom:10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.grid-buffer { 
+  margin-bottom:10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+#id_username,
+#id_password {
+  width: 300px;
+}
+
+ul {
+  list-style-type: none;
+}
+
+select {
+  border:1px solid #ccc;
+  vertical-align:top;
+  height:30px;
+}
+
+.manage_page_container {
+  margin: 0 0 20px 0;
+  padding: 0;
+  display: block;
+  overflow: hidden;
+}
+
+.background_content {
+  background-color: #ffff;
+  /* border: 1px solid #ced4da; */
+}
+
+h3.section_title {
+  font-family: "Open Sans", Helvetica, Arial, san-serif;
+  font-size: 30px;
+  color:#5cb85c;
+  display: inline-block;
+  margin: 10px 0 15px 0;
+  padding: 0;
+}
+
+svg.icon_spacer {
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.form_field_container {
+  margin: 0 0 10px 0;
+  display:block;
+  overflow:hidden;
+}
+
+label.form_label {
+  width: auto;
+  font-weight: 600;
+  margin: 5px 10px 0 0;
+  display: block;
+  overflow: hidden;
+}
+
+input.medium_field,
+select.medium_field {
+  width: 200px !important;
+}
+
+input.large_field,
+select.large_field {
+  width: 300px !important;
+}
+
+input.ex_large_field,
+select.ex_large_field {
+  width: 500px !important;
+}
+
+input.manage_search {
+  float: left;
+  width: 300px;
+  margin: 0 10px, 0 0;
+}
+
+select.manage_search {
+  float: left;
+  margin: 0 20px, 0 0;
+}
+
+button.manage_search {
+  float: left;
+  background-color: #2371c3;
+  border-color: #2371c3;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin: 0;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+input.search_field {
+  height: 30px;
+  border-right: none;
+}
+
+.button_container {
+  display: inline-block;
+  overflow: hidden;
+  margin: 0 0 0, 20px;
+  padding: 0;
+}
+
+button.manage_button {
+  float: left;
+  margin-right: 10px;
+  display: block;
+  overflow: hidden;
+}
+
+.field_caption {
+  color: cadetblue;
+}
+    </style>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">  </script> 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>    
@@ -72,7 +212,7 @@
                 <option value="Inactive">Inactive Users</option>
               </select>
               <div class="button_container">
-                <button type="button" class="btn btn-primary manage_search" id="new" onclick="location.href='/Admin/edit_user'"><span class="fal fa-ticket-alt icon_spacer"></span> New User</button>
+                <button type="button" class="btn btn-primary manage_search" id="new" onclick="location.href='/Users/create_user'"><span class="fal fa-ticket-alt icon_spacer"></span> New User</button>
               </div>
             </div>
 
@@ -93,6 +233,7 @@
               <th>Status</th>
               <th></th>
               <th></th>
+              <th></th>
             </tr>
 
             {% for data in dataset %}
@@ -103,6 +244,7 @@
                 <td>{{ data.status }}</td>
                 <td><a href='/Users/update_user/{{ data.pk }}'"> Update</a></td>
                 <td><a href='/Users/delete_user/{{ data.pk }}'"> Delete</a></td>
+                <td><a href='/Users/user_repositories/{{ data.pk }}'"> Repositories</a></td>
               </tr>
             {% endfor %}
 
