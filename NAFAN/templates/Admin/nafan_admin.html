@@ -19,6 +19,146 @@
       NAFAN.DefaultID = -1;
     </script>
  
+      <style>
+
+
+.page-header {
+    color: #5cb85c;
+  }
+
+.message {
+  color: cadetblue;
+}
+
+.top-buffer { 
+  margin-top:20px; 
+  margin-bottom:10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.grid-buffer { 
+  margin-bottom:10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+#id_username,
+#id_password {
+  width: 300px;
+}
+
+ul {
+  list-style-type: none;
+}
+
+select {
+  border:1px solid #ccc;
+  vertical-align:top;
+  height:30px;
+}
+
+.manage_page_container {
+  margin: 0 0 20px 0;
+  padding: 0;
+  display: block;
+  overflow: hidden;
+}
+
+.background_content {
+  background-color: #ffff;
+  /* border: 1px solid #ced4da; */
+}
+
+h3.section_title {
+  font-family: "Open Sans", Helvetica, Arial, san-serif;
+  font-size: 30px;
+  color:#5cb85c;
+  display: inline-block;
+  margin: 10px 0 15px 0;
+  padding: 0;
+}
+
+svg.icon_spacer {
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.form_field_container {
+  margin: 0 0 10px 0;
+  display:block;
+  overflow:hidden;
+}
+
+label.form_label {
+  width: auto;
+  font-weight: 600;
+  margin: 5px 10px 0 0;
+  display: block;
+  overflow: hidden;
+}
+
+input.medium_field,
+select.medium_field {
+  width: 200px !important;
+}
+
+input.large_field,
+select.large_field {
+  width: 300px !important;
+}
+
+input.ex_large_field,
+select.ex_large_field {
+  width: 500px !important;
+}
+
+input.manage_search {
+  float: left;
+  width: 300px;
+  margin: 0 10px, 0 0;
+}
+
+select.manage_search {
+  float: left;
+  margin: 0 20px, 0 0;
+}
+
+button.manage_search {
+  float: left;
+  background-color: #2371c3;
+  border-color: #2371c3;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin: 0;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+input.search_field {
+  height: 30px;
+  border-right: none;
+}
+
+.button_container {
+  display: inline-block;
+  overflow: hidden;
+  margin: 0 0 0, 20px;
+  padding: 0;
+}
+
+button.manage_button {
+  float: left;
+  margin-right: 10px;
+  display: block;
+  overflow: hidden;
+}
+
+.field_caption {
+  color: cadetblue;
+}
+    </style>
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">  </script> 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>    
@@ -48,39 +188,35 @@
 	<div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8">
 
-          <h4><a href="/Repositories/repositories">Repositories</a></h4>
+          <b><a href="/Repositories/repositories">Repositories</a></b>&nbsp;&nbsp;&nbsp;&nbsp;
+          <b><a href="/Users/users">Users</a></b>&nbsp;&nbsp;&nbsp;&nbsp;
+          <b><a href="/Admin/audit">Audit</a></b>&nbsp;&nbsp;&nbsp;&nbsp;
 
-          <p>A NAFAN Admin can perform all repository actions.  These include adding repository, editing repository
-             information, activating and deactivating a repository, and splitting and merging repositories.  Unlike a
-             Contributor Admin, a NAFAN Admin has access to all repositories in the system.
-          </p>
+          {% if action_items.count > 0 %}
+            <br/><br/>
+            <b>Join Requests</b>
+            <br/>
+          {% endif %}
 
-          <p>Currently the thinking is to contain the parent institute name within the repository.  There has been some
-             chatter about possibly saving that as a separate entity within the system.
-          </p>
+          {% for data in action_items %}
+            Name: {{ data.full_name }}<br/>
+            Email: {{ data.email }}<br/>
+            Phone: {{ data.phone }}<br/>
+            URL: {{ data.url }}<br/>
+            Collection: {{ data.collection_guides }}<br/>
+            Message: {{ data.message }}
+            <br/><br/>
+            <button type="button" class="btn btn-primary" id="clear" onclick="location.href='/clear_join/{{ data.pk }}'"> Clear</button>
+          <br/>
+          <br/>
+          {% endfor %}
 
-          <h4><a href="/Users/users">Users</a></h4>
-
-          <p>A NAFAN Admin can perform all user actions.  These include adding users, editing user
-             information and activating and deactivating a user.  Unlike a Contributor Admin, a NAFAN Admin 
-             has access to all users in the system.  A NAFAN admin also creates the initial Contributor Admin 
-             for a repository and has the capability of designating an existing user as a Contributer Admin.
-             The repositories available to a Contributor Admin are also designated by the NAFAN Admin.
-          </p>
-          
-          <h4><a href="/Admin/audit">Audit</a></h4>
-
-          <p>An Audit component contains information about the site usage.  This could contain web statistics such
-             as user logins, collections visited, search terms used, etc.  Anything worth tracking can be reported
-             within the Audit section.
-          </p>
-          
-          <h4><a href="/Admin/tracelog">TraceLog</a></h4>
+          {% comment %} <h4><a href="/Admin/tracelog">TraceLog</a></h4>
 
           <p>The Tracelog, on the other hand, primarily is used for internal system reporting.  Typically is contains
              any errors produced during site operation.  It can also be used to log timed activities, and is often
              used for logging system activity during development and to track production problems.
-          </p>
+          </p> {% endcomment %}
           
               {% comment %} <li><a href="/Admin/upload_repositories">Upload Repositories</a></l1> {% endcomment %}
 
