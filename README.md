@@ -1,6 +1,10 @@
 # prototype
 NAFAN Prototype Project
 
+Inline Styling:
+Yes, I know what a css file is and would have been happy to use it rather than put the styling in each page.  Spent a day trying to get it work properly in the deployment server without success and decided it wasn't worht pursuing for a prototype.  Feel free and superior doing it correctly.
+
+
 EAD Sources:
 1. ArchivesGrid - https://researchworks.oclc.org/nafan/source_data/  These are zipped files from the various repositories associated with the Archives 
   grid project
