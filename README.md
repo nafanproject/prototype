@@ -6,7 +6,7 @@ To populate users, there needs to be one user in the NAFAN_nafanuser table with 
 
 
 Inline Styling:
-Yes, I know what a css file is and would have been happy to use it rather than put the styling in each page.  Spent a day trying to get it work properly in the deployment server without success and decided it wasn't worht pursuing for a prototype.  Feel free and superior doing it correctly.
+Yes, I know what a css file is and would have been happy to use it rather than put the styling in each page.  Spent a day trying to get it work properly in the deployment server without success and decided it wasn't worth pursuing for a prototype.  Feel free and superior doing it correctly.
 
 
 EAD Sources:
