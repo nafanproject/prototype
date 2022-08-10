@@ -1,6 +1,10 @@
 # prototype
 NAFAN Prototype Project
 
+Database Preparation:
+To populate users, there needs to be one user in the NAFAN_nafanuser table with the user_type set to nafan_admin.  Thereafter, that user can set up everything within the application.  One change that has to happen is that the passwords in the database are not encrypted as yet.  Obviously this needs to change for any sort of production environment.
+
+
 Inline Styling:
 Yes, I know what a css file is and would have been happy to use it rather than put the styling in each page.  Spent a day trying to get it work properly in the deployment server without success and decided it wasn't worht pursuing for a prototype.  Feel free and superior doing it correctly.
 
