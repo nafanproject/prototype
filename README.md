@@ -1,15 +1,31 @@
 # prototype
 NAFAN Prototype Project
 
+Technical Stack:
+
+The NAFAN prototype is written in Python and uses the Django framework.  The relational database is PostgresSQL and the search engine is Elasticsearch.
+
+The following libraries are used.  These are listed in the requirements.txt file.
+- beautifulsoup4
+- elasticsearch
+- elasticsearch-dsl
+- pymarc
+- PyPDF2
+- requests
+- sickle
+
 Database Preparation:
+
 To populate users, there needs to be one user in the NAFAN_nafanuser table with the user_type set to nafan_admin.  Thereafter, that user can set up everything within the application.  One change that has to happen is that the passwords in the database are not encrypted as yet.  Obviously this needs to change for any sort of production environment.
 
+Styling:
 
-Inline Styling:
+The styling is based on bootstrap.
 Yes, I know what a css file is and would have been happy to use it rather than put the styling in each page.  Spent a day trying to get it work properly in the deployment server without success and decided it wasn't worth pursuing for a prototype.  Feel free and superior doing it correctly.
 
 
 EAD Sources:
+
 1. ArchivesGrid - https://researchworks.oclc.org/nafan/source_data/  These are zipped files from the various repositories associated with the Archives 
   grid project
 2. EADiva - https://eadiva.com/sampleEAD  These are a set of EAD files that were used to test the file harvest operation
