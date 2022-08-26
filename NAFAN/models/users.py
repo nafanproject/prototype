@@ -2,13 +2,9 @@ from django import forms
 from django.db import models
 from django.forms import ModelForm
 
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import User
-
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, UpdateView
 from django.urls import reverse_lazy
 from django.db import models
-from pkg_resources import resource_listdir
 
 from NAFAN.models import Repository, User_Repositories
 
@@ -62,23 +58,6 @@ class NAFANUser(models.Model):
                     user_add = NAFANUser.GetUser(user.user_name)
                     results.append(user_add)
 
-        # if searchTerm:
-        #     if searchField == "email":
-        #         if status:
-        #             results = NAFANUser.objects.filter(email__icontains=searchTerm).filter(status=status).order_by('email')
-        #         else:
-        #             results = NAFANUser.objects.filter(email__icontains=searchTerm).order_by('email')
-        #     else:
-        #         if status:
-        #             results = NAFANUser.objects.filter(full_name__icontains=searchTerm).filter(status=status).order_by('email')
-        #         else:
-        #             results = NAFANUser.objects.filter(full_name__icontains=searchTerm).order_by('email')
-        # else:
-        #     if status:
-        #         results = NAFANUser.objects.filter(status=status).order_by('email')
-        #     else:
-        #         results = NAFANUser.objects.all().order_by('email')
-
         return results
 
     def GetUser(username):
@@ -119,6 +98,7 @@ class UserUpdate(UpdateView):
     form_class = NAFANUserForm
     success_url = reverse_lazy('users')
 
+# Bad form to delete users as it typically screws up audit history
 # class UserDelete(DeleteView):
 #     model = NAFANUser
 #     success_url = reverse_lazy('users')

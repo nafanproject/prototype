@@ -18,18 +18,14 @@ from pymarc import MARCReader
 from PyPDF2 import PdfFileReader
 from sickle import Sickle
 
-# A single-level description with the minimum number of DACS elements includes:
+# The field sizes in the table definitions are all over the place as this was just to get the prototype
+# working with provided samples and there were no discussions of realistic values
 
-# Reference Code Element (2.1)
-# Name and Location of Repository Element (2.2)
-# Title Element (2.3)
-# Date Element (2.4)
-# Extent Element (2.5)
-# Name of Creator(s) Element (2.6) (if known)
-# Scope and Content Element (3.1)
-# Conditions Governing Access Element (4.1)
-# Languages and Scripts of the Material Element (4.5)
-# Rights Statements for Archival Description (8.2)
+FILE_TYPES = [('EAD', 'EAD'), ('MARC', 'MARC'), ('PDF', 'PDF'), ('Schema', 'HTML with Schema.org')]
+HARVEST_TYPES = [('File', 'File'),('Directory', 'Directory'), ('Sitemap', 'Sitemap'), ('OAI', 'OAI-PMH')]
+DAYS = [('1', '1'), ('2', '2'), ('3', '3'), ('4', '...')]
+HOURS = [('12AM', '12AM'), ('12:30AM', '12:30AM'), ('1AM', '1AM'), ('4', '...')]
+CCS = [('CC BY', 'CC BY:'), ('CC BY-SA', 'CC BY-SA'), ('CC BY-NC', 'CC BY-NC'), ('CC BY-NC-SA', 'CC BY-NC-SA'), ('CC BY-ND', 'CC BY-ND'), ('CC BY-NC-ND', 'CC BY-NC-ND'), ('CC0', 'CC0')]
 
 class Chronology(models.Model):
     finding_aid_id = models.CharField(max_length=32, blank=True)
@@ -113,6 +109,7 @@ class FindingAid(models.Model):
     governing_access = models.TextField(blank=True)
     languages = models.CharField(max_length=1255, blank=True)
     rights = models.CharField(max_length=1255, blank=True)
+    indent = models.CharField(max_length=255, blank=True)
 
     intra_repository = models.CharField(max_length=1255, blank=True)
     level = models.CharField(max_length=32, blank=True)
@@ -492,7 +489,9 @@ class FindingAid(models.Model):
                 if attribute == "bulk":
                     aid.date = aid.date + " [bulk " + date.string + "]"   
                 else:
-                    aid.date = aid.date + " " + date.string    
+                    aid.date = aid.date + " " + date.string
+        if aid.date:
+            aid.date = aid.date.strip()    
 
         containers = did.find_all('container') 
         for container in containers:
@@ -636,6 +635,10 @@ class FindingAid(models.Model):
         aid.progenitorID = progenitorID
         aid.parentID = parentID
         aid.component = current_level
+
+        for x in range(1, component_level):
+            aid.indent = aid.indent + "&nbsp;&nbsp;"
+
         aid.save()
 
         # Process the children
@@ -1260,12 +1263,6 @@ class FindingAid(models.Model):
         
         return hits
 
-FILE_TYPES = [('EAD', 'EAD'), ('MARC', 'MARC'), ('PDF', 'PDF'), ('Schema', 'HTML with Schema.org')]
-HARVEST_TYPES = [('File', 'File'),('Directory', 'Directory'), ('Sitemap', 'Sitemap'), ('OAI', 'OAI-PMH')]
-DAYS = [('1', '1'), ('2', '2'), ('3', '3'), ('4', '...')]
-HOURS = [('12AM', '12AM'), ('12:30AM', '12:30AM'), ('1AM', '1AM'), ('4', '...')]
-CCS = [('CC BY', 'CC BY:'), ('CC BY-SA', 'CC BY-SA'), ('CC BY-NC', 'CC BY-NC'), ('CC BY-NC-SA', 'CC BY-NC-SA'), ('CC BY-ND', 'CC BY-ND'), ('CC BY-NC-ND', 'CC BY-NC-ND'), ('CC0', 'CC0')]
-
 class AidProfile(models.Model):
     repository_id = models.IntegerField(default=1, blank=True, null=True)
     governing_access = models.TextField(blank=True)
@@ -1323,24 +1320,6 @@ class HarvestProfileForm(ModelForm):
 
     def __init__(self, *args, **kwargs): 
         super(HarvestProfileForm, self).__init__(*args, **kwargs)  
-
-class MinimalAidForm(ModelForm):
-    class Meta:
-        model = FindingAid
-        fields = '__all__'
-        
-        widgets = {
-            'aid_type': forms.TextInput(attrs={'class': 'form-control large_field'}),
-            'repository': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
-            'name_and_location': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
-            'title': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
-            'date': forms.TextInput(attrs={'class': 'form-control large_field'}),
-            'scope_and_content': forms.Textarea(attrs={'class': 'form-control large_field'}),
-            'active': forms.BooleanField(),
-        }
-
-    def __init__(self, *args, **kwargs): 
-        super(MinimalAidForm, self).__init__(*args, **kwargs)                       
 
 class DacsAidForm(ModelForm):
     class Meta:
