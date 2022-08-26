@@ -270,13 +270,7 @@ button.manage_button {
                 {% comment %} <td><a href='/Repositories/delete_repository/{{ data.pk }}'"> Delete</a></td> {% endcomment %}
                 <td><a href='/FindingAids/finding_aids/{{ data.pk }}'"> Finding Aids</a></td>
                 {% comment %} <td><a href='/Repositories/report_repository/{{ data.pk }}'"> Report</a></td>
-
-                {% if data.email %}
-                  <td><a href='/Repositories/invite_repository/{{ data.pk }}'"> Invite</a></td>
-                {% else %} {% endcomment %}
-                  {% comment %} <td></td> {% endcomment %}
-                {% comment %} {% endif %} {% endcomment %}
-
+{% endcomment %}
               </tr>
             {% endfor %}
 

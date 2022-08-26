@@ -398,16 +398,19 @@ button.manage_button {
                     {{ data.note}}
                   </div>
             {% else %}
-                  <b>{{ data.title }}</b><br/>
-                    {{ data.container}}<br/>
+                  {{ data.indent | safe }}<i>{{ data.title }}</i><br/>
+                  {{ data.indent | safe }}{{ data.container}}<br/>
+                  {% if data.digital_link %}
+                    {{ data.indent | safe }}<a target='blank' href={{ data.digital_link }}>View Digital Object</a><br/>
+                  {% endif %}
                   {% if data.date %}
-                    {{ data.date }}<br/>
+                    {{ data.indent | safe }}{{ data.date }}<br/>
                   {% endif %}
                   {% if data.extent %}
-                    {{ data.extent}}<br/>
+                    {{ data.indent | safe }}{{ data.extent}}<br/>
                   {% endif %}
                   {% if data.scope_and_content %}
-                    {{ data.scope_and_content | safe }}<br/>
+                    {{ data.indent | safe }}{{ data.scope_and_content | safe }}<br/>
                   {% endif %}
             {% endif %}
                 <br/>
