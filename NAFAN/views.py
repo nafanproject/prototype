@@ -13,29 +13,20 @@ from django.http import HttpResponse, JsonResponse
 
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect
 
-from .models import NAFANLoginForm, NAFANLog, NAFANAudit, NAFANUser, NAFANUserForm, NAFANContactForm, NAFANJoinUsForm
-from .models import Repository, RepositoryForm, User_Repositories, UploadFileForm, RepositoryApplicationForm, save_uploaded_file
-from .models import FindingAid, FindingAidSubjectHeader, DacsAidForm, MinimalAidForm, EADAidForm, MARCAidForm, PDFAidForm, HarvestFilesForm, NAFANJoinUs
+from .models import NAFANLoginForm, NAFANLog, NAFANAudit, NAFANUser, NAFANUserForm, NAFANJoinUsForm
+from .models import Repository, RepositoryForm, User_Repositories, UploadFileForm, save_uploaded_file
+from .models import FindingAid, FindingAidSubjectHeader, DacsAidForm, EADAidForm, MARCAidForm, PDFAidForm, NAFANJoinUs
 from .models import Chronology, ControlAccess, AidProfile, AidProfileForm, HarvestProfile, HarvestProfileForm, FindingAidAudit
 
 import lxml.etree as ET
 
+# Public
 
 def home(request):
 
-    # FindingAid.ASpace()
-    
     search_term = request.GET.get('searchTerm', '')
 
     if search_term:
-    # send_mail(
-    #         'BASE_DIR',
-    #         os.path.join(x, 'static'),
-    #         'aaf8qn@virginia.edu',
-    #         ['aaf8qn@virginia.edu'],  # This needs to be added to constants or application settings
-    #         fail_silently=False,
-    #     )
-
         request.session['search_term'] = search_term
 
         response = FindingAid.Search(search_term)
@@ -55,6 +46,14 @@ def search_results(request):
     else:
         return render(request, "NAFAN/index.html")
 
+# There are four roles available in the NAFAN prototype
+# nafan_admin - internal nafan users who can create new users, but cannot modify finding aids
+# contributor_admin - external user who can add other users to repositories they administer
+# contributor - external user who can modify finding aids within repositories they are assigned
+# researcher - external user whose capabilities are undefined
+
+# Each user type is presented with a different page on login, hence the redirects
+
 def NAFANLogin(request):
 
     login_message = ""
@@ -62,9 +61,6 @@ def NAFANLogin(request):
 
         form = NAFANLoginForm(request.POST)
         if form.is_valid():
-
-            # May or may not want to save this information to the database
-            # application.save()
 
             user = NAFANUser.GetUser(form.cleaned_data['email'])
             if not user:
@@ -88,6 +84,34 @@ def NAFANLogin(request):
 
     return render(request, 'NAFAN/NAFANLogin.html', {'form': form, 'login_message': login_message})
 
+def nafan_admin(request):
+    context ={}
+       
+    # Get any pending Join Us requests
+    context["action_items"] = NAFANJoinUs.GetActionItems()
+
+    return render(request, "Admin/nafan_admin.html", context)
+
+def contributor_admin(request):
+    return render(request, "Admin/contributor_admin.html")
+
+def contributor(request):
+
+    user_email = request.session['current_login']
+
+    # Find the repositories for a user so the finding aids page can be populated with them
+    repositories = User_Repositories.GetRepositories(user_email)
+
+    # Default to the first one in the list
+    repository = Repository.GetRepositoryByName(repositories.first().repository_name)
+
+    return HttpResponseRedirect("/FindingAids/finding_aids/" + str(repository.id))
+
+def researcher(request):
+    return render(request, "NAFAN/researcher.html")
+
+# This is for the external Join Us page where repositories can ask to join NAFAN
+
 def joinus(request):
 
     list(messages.get_messages(request))
@@ -100,16 +124,18 @@ def joinus(request):
 
             form.save()
 
+            # Not thrilled with this feedback.  It should probably be a popup
             messages.success(request, 'Your message has been sent to the NAFAN staff.')
 
             # This blanks out the fields on the form
             form = NAFANJoinUsForm()
-
     else:
 
         form = NAFANJoinUsForm()
         
     return render(request, 'NAFAN/joinus.html', {'form': form})
+
+# This is a generic Help page which can be used to display information based on the topic passed
 
 def help(request, topic):
 
@@ -123,9 +149,10 @@ def help(request, topic):
 
     return render(request, "NAFAN//help.html", context)
 
+# Clear a join request after the NAFAN admin has done something with the request
+
 def clear_join(request, id):
-    # dictionary for initial data with
-    # field names as keys
+
     context ={}
  
     # fetch the object related to passed id
@@ -142,73 +169,11 @@ def forgot_password(request):
         
     return render(request, 'NAFAN/forgot_password.html')
 
-def newToNAFAN(request):
-        
-    dom = ET.parse("uploads/ms0106.xml")
-    xslt = ET.parse("uploads/eadcbs9,xsl")
-    transform = ET.XSLT(xslt)
-    newdom = transform(dom)
-    print(ET.tostring(newdom, pretty_print=True))
-
-def organizations(request):
-
-    searchField = request.GET.get('search_field', '')
-    searchTerm = request.GET.get('search_term', '')
-
-    repositories = Repository.GetOrganizations(searchField, searchTerm)
-    return render(request,'NAFAN/organizations.html',{"repositories":repositories})
-
-def contact(request):
-
-    list(messages.get_messages(request))
-
-    if request.method == 'POST':
-
-        form = NAFANContactForm(request.POST)
-        
-        if form.is_valid():
-
-            # May or may not want to save this information to the database
-            # form.save()
-
-            message = 'From ' + form.cleaned_data['full_name'] + "\r\n"
-            message = message + 'Message ' + form.cleaned_data['message'] + "\r\n"
-            
-            # send_mail does not work locally
-            # send_mail(
-            #     'NAFAN Repository Application' + form.cleaned_data['subject'],
-            #     message,
-            #     form.cleaned_data['email'],
-            #     ['aaf8qn@virginia.edu'],  # This needs to be added to constants or application settings
-            #     fail_silently=False,
-            # )
-
-            messages.success(request, 'Your message has been sent to the NAFAN staff.')
-
-            # This blanks out the fields on the form
-            form = NAFANContactForm()
-
-    else:
-
-        form = NAFANContactForm()
-        
-    return render(request, 'NAFAN/contact.html', {'form': form})
-
-def spotlights(request):
-
-    return render(request, 'NAFAN/spotlights.html')
-
 def Repository_Info(request, repository_name):
         
     repository = Repository.GetRepositoryByName(repository_name)
 
     return render(request, 'NAFAN/Repository_Info.html', {"repository":repository})
-
-def Aid_Details(request, id):
-        
-    aid = get_object_or_404(FindingAid, id = id)
-
-    return render(request, 'NAFAN/Aid_Details.html', {'aid': aid})
 
 def Browse_Repository(request, id):
         
@@ -254,41 +219,18 @@ def view_aid_public(request, id):
     context["contents"] = FindingAid.objects.filter(progenitorID=id).order_by('pk')
     context["chron"] = Chronology.objects.filter(finding_aid_id=id).order_by('sort_order')
     context["series"] = FindingAid.objects.filter(progenitorID=id,level="c01").order_by('pk')
-    # series = FindingAid.objects.filter(progenitorID=id,level="c01").order_by('pk')
-    # for ser in series:
-    #     print(ser.title)
     context["names"] = ControlAccess.objects.filter(finding_aid_id=id,control_type="persname").order_by('term')
     context["subjects"] = ControlAccess.objects.filter(finding_aid_id=id,control_type="subject").order_by('term')
     context["materials"] = ControlAccess.objects.filter(finding_aid_id=id,control_type="genreform").order_by('term')
 
     return render(request, "NAFAN/view_aid_public.html", context)
 
-def contributor_admin(request):
-    return render(request, "Admin/contributor_admin.html")
-
-def nafan_admin(request):
-    context ={}
-       
-    context["action_items"] = NAFANJoinUs.GetActionItems()
-
-    return render(request, "Admin/nafan_admin.html", context)
-
-def contributor(request):
-
-    user_email = request.session['current_login']
-
-    repositories = User_Repositories.GetRepositories(user_email)
-
-    repository = Repository.GetRepositoryByName(repositories.first().repository_name)
-
-    return HttpResponseRedirect("/FindingAids/finding_aids/" + str(repository.id))
-
-def researcher(request):
-    return render(request, "NAFAN/researcher.html")
-
 def NAFANlogout(request):
     logout(request)
     return render(request, "NAFAN/index.html")
+
+
+# Admin
 
 def tracelog(request):
 
@@ -305,15 +247,10 @@ def audit(request):
 
     return render(request, 'Admin/audit.html')
 
-def NAFANActions(request):
-
-    return render(request, 'Admin/NAFANActions.html')
 
 # Users
 
 def users(request):
-    # dictionary for initial data with
-    # field names as keys
     context ={}
  
     searchField = request.GET.get('search_field', '')
@@ -402,6 +339,8 @@ def update_user(request, id):
 
 def repositories(request):
 
+    # Figure out if this is a search or a reset of the search
+
     search = True
     if request.GET.get("reset"):
         search = False
@@ -433,6 +372,8 @@ def repositories(request):
     email = request.session['current_login']
     user = NAFANUser.GetUser(email)
 
+    # Get the set of repositories to show the user based on role and assignments
+
     if user.user_type == "nafan_admin":
         repositories = Repository.GetRepositories(searchField, searchTerm, status)
         return render(request,'Repositories/repositories.html',{"repositories":repositories, "user_type":user.user_type})
@@ -441,19 +382,21 @@ def repositories(request):
         return render(request,'Repositories/repositories.html',{"repositories":repositories, "user_type":user.user_type})
 
 def create_repository(request):
-    # dictionary for initial data with
-    # field names as keys
     context ={}
  
     # add the dictionary during initialization
     form = RepositoryForm(request.POST or None)
     if form.is_valid():
+
+        # Save the new repository to the SQL DB
         form.save()
 
         repository = Repository.GetRepositoryByID(form.instance.id)
 
+        # Create a search entry for the repository by default
         elasticsearch_id = FindingAid.CreateIndex(form.instance.id, "repository", repository.repository_name, repository.repository_name, repository.description, "")
 
+        # Add the elasticsearch id to the repository
         if elasticsearch_id != "Fail":
             Repository.objects.filter(pk=form.instance.id).update(elasticsearch_id=elasticsearch_id)
 
@@ -464,16 +407,13 @@ def create_repository(request):
     return render(request, "Repositories/create_repository.html", context)
 
 def update_repository(request, id):
-    # dictionary for initial data with
-    # field names as keys
     context ={}
  
-    # fetch the object related to passed id.  This is a pointer to the object and changes on form.save, so anything not
+    # Fetch the object related to passed id.  This is a pointer to the object and changes on form.save, so anything not
     # displayed on the form is lost.
     obj = get_object_or_404(Repository, id = id)
     esID = obj.elasticsearch_id
  
-    # pass the object as instance in form
     form = RepositoryForm(request.POST or None, instance = obj)
  
     # save the data from the form and
@@ -482,6 +422,7 @@ def update_repository(request, id):
 
         repository = form.save(commit=False)
 
+        # If we already have an elasticsearch entry update it, otherwise create one
         if esID:
             FindingAid.UpdateIndex(form.instance.id, esID, "repository", repository.repository_name, repository.repository_name, repository.description, "")
         else:
@@ -502,8 +443,6 @@ def update_repository(request, id):
     return render(request, "Repositories/update_repository.html", context)
 
 def delete_repository(request, id):
-    # dictionary for initial data with
-    # field names as keys
     context ={}
  
     # fetch the object related to passed id
@@ -517,36 +456,32 @@ def delete_repository(request, id):
     return HttpResponseRedirect("/Repositories/repositories")
 
 def report_repository(request, id):
-    # dictionary for initial data with
-    # field names as keys
+
+    # Mock up of what a report on repository access might be
+
     context ={}
  
     obj = get_object_or_404(Repository, id = id)
-    # context["repository_id"] = request.session['active_repository']
     context["repository_name"] = obj.repository_name
  
     return render(request, "Repositories/report_repository.html", context)
-
-def invite_repository(request, id):
-    # dictionary for initial data with
-    # field names as keys
-    context ={}
- 
-    obj = get_object_or_404(Repository, id = id)
-    # context["repository_id"] = request.session['active_repository']
-    context["repository_name"] = obj.repository_name
-    context["contact"] = obj.email
-    context["subject"] = "Join us in NAFAN"
-
-    return render(request, "Repositories/invite_repository.html", context)
 
 def get_repository_search(request):
 
     return JsonResponse({'SearchField': request.session['repository_search_field'], 'SearchTerm': request.session['repository_search_term'], 'Status': request.session['repository_search_status']})
 
-def get_organization_search(request):
+def upload_repositories(request):
 
-    return JsonResponse({'SearchField': request.session['repository_search_field'], 'SearchTerm': request.session['repository_search_term']})
+    # Upload function for RepoData file
+
+    if request.method == 'POST':
+        fileName = save_uploaded_file(request.FILES['file'])
+        response = Repository.handle_RepoData_upload(fileName)
+        return HttpResponse(response)
+    else:
+        form = UploadFileForm()
+
+    return render(request, 'Repositories/upload_repositories.html', {'form': form})
 
 def export_repositories(request):
 
@@ -581,19 +516,6 @@ def user_repositories(request, id):
     return render(request,'Users/user_repositories.html',
         {"repositories":repositories, 'user_repositories': user_repositories, 'username': user.email})
 
-def upload_repositories(request):
-
-    if request.method == 'POST':
-        # form = UploadFileForm(request.POST, request.FILES)
-        # if form.is_valid():
-        fileName = save_uploaded_file(request.FILES['file'])
-        response = Repository.handle_RepoData_upload(fileName)
-        return HttpResponse(response)
-    else:
-        form = UploadFileForm()
-
-    return render(request, 'Repositories/upload_repositories.html', {'form': form})
-
 def add_user_repository(request):
     username = request.GET.get('username', None)
     repository = request.GET.get('repository', None)
@@ -618,36 +540,33 @@ def remove_user_repository(request):
 # Finding Aids
 
 def finding_aids(request, id):
-    # dictionary for initial data with
-    # field names as keys
+
+    # Display the finding aids main page specific to the user
     context ={}
  
     request.session['active_repository'] = id
-
-    # add the dictionary during initialization
     repository = Repository.GetRepositoryByID(id)
     context["dataset"] = FindingAid.GetFindingAidsByRepository(repository.repository_name)
 
-    x = User_Repositories.GetRepositories(request.session['current_login'])
-    for e in x:
-        print(e.repository_name)
-
+    # Only show repositories available to the user
     context["repositories"] = User_Repositories.GetRepositories(request.session['current_login'])
         
     email = request.session['current_login']
     user = NAFANUser.GetUser(email)
     context['user_type'] = user.user_type
-
     context['repository_name'] = repository.repository_name
 
     return render(request, "FindingAids/finding_aids.html", context)
 
 def aid_profile(request):
+
+    # Display the page that holds default finding aid settings for the repository
     context ={}
  
     repository = Repository.GetRepositoryByID(request.session['active_repository'])
     context['repository_name']= repository.repository_name
 
+    # If the profile exists populate it, otherwise create a blank one
     if AidProfile.Exists(request.session['active_repository']):
         profile = AidProfile.GetAidProfileByID(request.session['active_repository'])
         form = AidProfileForm(request.POST or None, instance = profile)
@@ -671,6 +590,10 @@ def aid_profile(request):
     return render(request, "FindingAids/aid_profile.html", context)
 
 def new_aid(request):
+
+    # Redirect the new finding aid request to the proper page based on type desired.
+    # This was a simple way to allow variations during design and initial testing.
+    # I have no doubt it could be improved
 
     dacs = '2'
     ead = '3'
@@ -696,6 +619,7 @@ def delete_aid(request, id):
     # fetch the object related to passed id
     obj = get_object_or_404(FindingAid, id = id)
  
+    # Remove the aid from elastic search.  This needs to be expanded to remove the components.
     FindingAid.RemoveIndex(obj.elasticsearch_id)
 
     # Remove any components
@@ -707,8 +631,8 @@ def delete_aid(request, id):
     return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
  
 def create_dacs(request):
-    # dictionary for initial data with
-    # field names as keys
+
+    # Display a page for the creation of a manual DACS-based finding aid
     context ={}
  
     repository = Repository.GetRepositoryByID(request.session['active_repository'])
@@ -729,9 +653,11 @@ def create_dacs(request):
         aid.aid_type = "dacs"
         aid.repository = context['repository_name']
         
+        # Save the notes for the audit, but clear them in the database so they show blank on the next edit
         notes = aid.revision_notes
         aid.revision_notes = ""
 
+        # Assign the date and user of the last update
         user = NAFANUser.GetUser(request.session['current_login'])
         aid.updated_by = user.full_name
 
@@ -739,12 +665,18 @@ def create_dacs(request):
         aid.last_update = today.strftime("%B %d, %Y")
 
         aid.save()
+       
+        # Since this is the create, add a new entry for a finding aid into the search engine
+        elasticsearch_id = FindingAid.CreateIndex(aid.pk, "dacs", aid.title, aid.repository, aid.scope_and_content, "")
 
-        elasticsearch_id = FindingAid.CreateIndex(form.instance.id, "dacs", aid.title, aid.repository, aid.scope_and_content, "")
-
+        # Save the search engine index into the finding aid entry in the relational database
         if elasticsearch_id != "Fail":
             FindingAid.objects.filter(pk=form.instance.id).update(elasticsearch_id=elasticsearch_id)
 
+        aid.elasticsearch_id = elasticsearch_id
+        aid.save()
+
+        # Add the audit
         FindingAidAudit.AddAudit(form.instance.id, notes, user.full_name, today)
 
         return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
@@ -764,8 +696,6 @@ def ingest_ead(request):
         if form.is_valid():
             
             for f in request.FILES.getlist('file'):
-
-                #fileName = save_uploaded_file(request.FILES['file'])
 
                 fileName = save_uploaded_file(f)
 
@@ -836,10 +766,28 @@ def ingest_schema(request):
 
     return render(request, 'FindingAids/ingest_schema.html', {'form': form, "repository_name":repository.repository_name, "repository_id": request.session['active_repository']})
 
+def update_aid(request, id):
+
+    # Not entirely confident the EAD and MARC are going to be editable or if they will just be uploaded again when needed
+    context ={}
+ 
+    # fetch the object related to passed id
+    aid = get_object_or_404(FindingAid, id = id)
+ 
+    request.session['active_finding_aid'] = id
+
+    # case statement for display of aid based on type
+    if aid.aid_type == "dacs":
+        return HttpResponseRedirect("/FindingAids/edit_dacs/" + str(id))
+
+    if aid.aid_type == "ead":
+        return HttpResponseRedirect("/FindingAids/edit_ead/" + str(id))
+
+    if aid.aid_type == "marc":
+        return HttpResponseRedirect("/FindingAids/edit_marc/" + str(id))
+
 def edit_dacs(request, id):
 
-    # dictionary for initial data with
-    # field names as keys
     context ={}
  
     # fetch the object related to passed id
@@ -919,64 +867,6 @@ def edit_ead(request, id):
 
     return render(request, 'FindingAids/edit_ead.html', {'form': form, "aid": aid, "repository_id": request.session['active_repository']})
 
-def update_aid(request, id):
-
-    # dictionary for initial data with
-    # field names as keys
-    context ={}
- 
-    # fetch the object related to passed id
-    aid = get_object_or_404(FindingAid, id = id)
- 
-    request.session['active_finding_aid'] = id
-
-    # case statement for display of aid based on type
-    if aid.aid_type == "minimal":
-        return HttpResponseRedirect("/FindingAids/edit_dacs/" + str(id))
-    #     return HttpResponseRedirect("/FindingAids/edit_minimal/" + str(id))
-
-    if aid.aid_type == "dacs":
-        return HttpResponseRedirect("/FindingAids/edit_dacs/" + str(id))
-
-    if aid.aid_type == "ead":
-        return HttpResponseRedirect("/FindingAids/edit_ead/" + str(id))
-
-    if aid.aid_type == "marc":
-        return HttpResponseRedirect("/FindingAids/edit_marc/" + str(id))
-
-
-    # dictionary for initial data with
-    # field names as keys
-    context ={}
- 
-    # fetch the object related to passed id
-    obj = get_object_or_404(FindingAid, id = id)
-    esID = obj.elasticsearch_id
-    repository = obj.repository
-
-    # pass the object as instance in form
-    form = MinimalAidForm(request.POST or None, instance = obj)
- 
-    # save the data from the form and
-    # redirect to detail_view
-    if form.is_valid():
-        aid = form.save(commit=False)
-        aid.aid_type = "minimal"
-        aid.repository = repository
-        aid.elasticsearch_id = esID
-        aid.save()
-
-        FindingAid.UpdateIndex(form.instance.id, esID, "minimal", aid.title, aid.repository, aid.scope_and_content, "")
-
-        return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
- 
-    # add form dictionary to context
-    context["form"] = form
-    context["repository_id"] = request.session['active_repository']
-    context["repository_name"] = obj.repository
- 
-    return render(request, "FindingAids/edit_minimal.html", context)
-
 def edit_marc(request, id):
 
     # dictionary for initial data with
@@ -1043,14 +933,11 @@ def edit_pdf(request, id):
 
 def view_aid(request, id):
 
-    # dictionary for initial data with
-    # field names as keys
+    # This is for nafan_admins to look at the finding aid without the edit capability
     context ={}
  
     # fetch the object related to passed id
     aid = get_object_or_404(FindingAid, id = id)
- 
-    # case statement for display of aid based on type
  
     # add form dictionary to context
     context["aid"] = aid
