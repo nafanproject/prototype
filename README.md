@@ -1,6 +1,9 @@
 # prototype
 NAFAN Prototype Project
 
+This document discusses the more technical aspects of the NAFAN prototype.  Discussion of the operation of the application is contained in the Wiki.
+
+
 Technical Stack:
 
 The NAFAN prototype is written in Python and uses the Django framework.  The relational database is PostgresSQL and the search engine is Elasticsearch.
