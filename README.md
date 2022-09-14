@@ -20,7 +20,7 @@ The following libraries are used.  These are listed in the requirements.txt file
 Roles:
 
 nafan_admin
-This role represents an internal NAFAN administrator.  These users log into the nafan_admin.html page and view a list of join requests.  They can add users to any repository and add additional NAFAN admins.  They can view all repositories and finding aids, but cannot modify the finding aids.
+This role represents an internal NAFAN administrator.  These users log into the nafan_admin.html page and view a list of join requests.  They can add users to any repository and add additional NAFAN admins.  They are able to perform all repository and finding aid actions for an institution, although with the findings in the Shift Collective report leaving this capability in place is problematic.
 
 contributor_admin
 This role represents the primary contacts for a repository. These users log into the contributor_admin.html page. Once established by the NAFAN admin, they can create other users from their assigned repositories and assign any repositories the are currently assigned to their users.  They are able to edit information about their repositories and create and modify finding aids.
