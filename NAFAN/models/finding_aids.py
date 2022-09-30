@@ -27,18 +27,21 @@ DAYS = [('1', '1'), ('2', '2'), ('3', '3'), ('4', '...')]
 HOURS = [('12AM', '12AM'), ('12:30AM', '12:30AM'), ('1AM', '1AM'), ('4', '...')]
 CCS = [('CC BY', 'CC BY:'), ('CC BY-SA', 'CC BY-SA'), ('CC BY-NC', 'CC BY-NC'), ('CC BY-NC-SA', 'CC BY-NC-SA'), ('CC BY-ND', 'CC BY-ND'), ('CC BY-NC-ND', 'CC BY-NC-ND'), ('CC0', 'CC0')]
 
+# Handles chronitem
 class Chronology(models.Model):
     finding_aid_id = models.CharField(max_length=32, blank=True)
     date = models.CharField(max_length=255, blank=True)
     event = models.CharField(max_length=1255, blank=True)
     sort_order = models.IntegerField()
 
+# Handle controlaccess
 class ControlAccess(models.Model):
     finding_aid_id = models.CharField(max_length=32, blank=True)
     term = models.CharField(max_length=255, blank=True)
     link = models.CharField(max_length=1255, blank=True)
     control_type = models.CharField(max_length=1255, blank=True)
 
+# Audits of Finding Aid creation and modification
 class FindingAidAudit(models.Model):
     finding_aid_id = models.CharField(max_length=32, blank=True)
     revision_notes = models.CharField(max_length=255, blank=True)
@@ -65,6 +68,9 @@ class FindingAidAudit(models.Model):
     def GetAudit(finding_aid_id):
         return FindingAidAudit.objects.filter(finding_aid_id=finding_aid_id).order_by('-update_date')
 
+# Used to add Subject Headers for a finding aid to be used with searches.  These have not been added to
+# the Elasticsearch functionality.  I believe the desired implementation is to have them as available values
+# per repository and then make them available to select at the finding aid level.
 class FindingAidSubjectHeader(models.Model):
     finding_aid_id = models.CharField(max_length=32, blank=True)
     subject_header = models.CharField(max_length=255, blank=True)
@@ -83,6 +89,8 @@ class FindingAidSubjectHeader(models.Model):
             print(str(ex))
             
         return True
+
+    # Need a remove
 
     def GetSubjectHeaders(finding_aid_id):
         return FindingAidSubjectHeader.objects.filter(finding_aid_id=finding_aid_id)
@@ -131,39 +139,40 @@ class FindingAid(models.Model):
     bioghist = models.TextField(blank=True)
     originals_location = models.TextField(blank=True)
     
-    
-    # accruals = models.TextField(blank=True)
-    # altformavail = models.TextField(blank=True)
-
     # archref needs to be treated like a <cXX> element
     # bibliography consists of a list of <bibref> and/or other elements, pull into single entry
     # <c> treated with a find_all and handled like the <cXX>
     
+    # This is the base Finding aid ID used to maintain relationships between the archref and <cXX>
+    # components within the search engine as each are independent entries
     progenitorID = models.IntegerField(default=0, blank=True)
-    parentID = models.IntegerField(default=0, blank=True)
-    component = models.CharField(max_length=10, blank=True)
 
+    # This is used to keep the relationship going through <cXX> components
+    parentID = models.IntegerField(default=0, blank=True)
+
+    component = models.CharField(max_length=10, blank=True)
 
     def __str__(self):
         return self.title
 
+    # This needs to be converted to GetByID if the name are not made canonical and be duplicate
     def GetFindingAidsByRepository(name):
         return FindingAid.objects.filter(repository=name)
 
-    def RemoveIndex(elasticsearch_id):
-
-        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-
-        try:
-            es.delete(index="nafan",doc_type="_doc",id=elasticsearch_id)
-        except Exception as ex:
-            print('Error in indexing data')
-            print(str(ex))
+    # The Elasticsearch index consists of:
+    # id - finding aid ID
+    # type - type of item being indexed (web page, EAD, MARC, etc.)
+    # title - title of the item being indexed
+    # repository - name of the repository that owns the finding aid
+    # content - whatever makes sense to index
+    # source - Originally thought to hold things like file name, not sure if it is useful anymore
+    # destination - Originally thought to hold the link to external links, not used and always blank currently
 
     def CreateIndex(id, index_type, title, repository_name, description, source):
 
-        elasticsearch_id = "Fail"
+        elasticsearch_id = "Fail"   # Bit dicey to mix and match IDs and text, but if Python doesn't care...
 
+        # If there is something to index
         if description:
             es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
             
@@ -183,13 +192,10 @@ class FindingAid(models.Model):
 
     def UpdateIndex(id, elasticsearch_id, index_type, title, repository_name, description, source):
 
+        # If there is something to index
         if description:
             
             es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-
-            answer = es.exists(index="nafan", id=elasticsearch_id)
-
-            # es.delete(index="nafan",doc_type="_doc",id='eXQOKH8B1OSm-tO3ayA_')
 
             # For update it needs to be wrapped in {'doc': }
             record = {'doc':{'id': id, 'type': index_type, 'title': title, 'repository': repository_name, 'content': description, 'source': source, 'destination': ""}}
@@ -202,6 +208,16 @@ class FindingAid(models.Model):
                 print('Error in indexing data')
                 print(str(ex))
 
+    def RemoveIndex(elasticsearch_id):
+
+        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+
+        try:
+            es.delete(index="nafan",doc_type="_doc", id=elasticsearch_id)
+        except Exception as ex:
+            print('Error in indexing data')
+            print(str(ex))
+
     def EADIndex(id, repository, filepath, user_name):
                     
         response = "OK"
@@ -211,15 +227,17 @@ class FindingAid(models.Model):
             if id == "new":
                 aid = FindingAid()
             else:
-                # Is there a point in editing an EAD?  Probably need to delete the existing
-                # EAD and all of its components in the database before processing
                 aid = FindingAid.objects.get(id=id)
 
             aid.aid_type = "ead"
             aid.repository = repository
 
+            # Yank the text and start parsing it
             html_doc = ead_file.read()
             soup = BeautifulSoup(html_doc, 'html.parser')
+
+            # Make an internal EAD from the initial file
+            # The EAD parsing is not as elegant as it should be in a final implementation
             response = FindingAid.MakeEAD(id, soup, aid, user_name, filepath)
 
         return response
@@ -228,6 +246,7 @@ class FindingAid(models.Model):
         
         response = "OK"
 
+        # Access the search engine for indexing
         es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
         try:
@@ -235,20 +254,20 @@ class FindingAid(models.Model):
             archdesc = soup.find('archdesc')
             did = archdesc.find('did')
 
-            # parse the high did
+            # parse the archdesc did
             aid = FindingAid.ParseDid(did, aid, "archdesc")
 
             # if the following weren't found in the high did, go look for them
 
             # There can be multiple accessrestrict entries
-            # aid.governing_access = String_or_p_tag(soup, 'accessrestrict')
             if not aid.governing_access:
-                governing_access = did.find_all('accessrestrict') 
-                if governing_access:
-                    for entry in governing_access:
-                        aid.governing_access = aid.governing_access + entry.get_text() + " "
-                    aid.governing_access = cleanhtml(str(aid.governing_access))
-                    aid.governing_access = aid.governing_access.strip()
+                aid.governing_access = String_or_p_tag(soup, 'accessrestrict')
+                # governing_access = did.find_all('accessrestrict') 
+                # if governing_access:
+                #     for entry in governing_access:
+                #         aid.governing_access = aid.governing_access + entry.get_text() + " "
+                #     aid.governing_access = cleanhtml(str(aid.governing_access))
+                #     aid.governing_access = aid.governing_access.strip()
 
             if not aid.rights:
                 aid.rights = String_or_p_tag(soup, 'userestrict')
@@ -262,6 +281,8 @@ class FindingAid(models.Model):
             if not aid.scope_and_content:
                 aid.scope_and_content = String_or_p_tag(soup, 'scopecontent')
             
+            # aid.repository_link = "https://archives.nypl.org/scm/24872"
+
             if not aid.custodhist:
                 aid.custodhist = String_or_p_tag(soup, 'custodhist')
             
@@ -270,132 +291,149 @@ class FindingAid(models.Model):
             
             if not aid.processinfo:
                 process = soup.find_all('processinfo')
-                for item in process:
-                    aid.processinfo = aid.processinfo + " " + item.p.string
+                if process:
+                    for item in process:
+                        try:
+                            aid.processinfo = aid.processinfo + " " + item.p.string
+                        except Exception as ex:
+                            print('Error handling processinfo ' + str(ex))
 
             if not aid.originals_location:
                 aid.originals_location = String_or_p_tag(soup, 'originalsloc')
                 
+            # Mark the indexing date and the user who did the indexing
             today = date.today()
             aid.last_update = today.strftime("%B %d, %Y")
             aid.updated_by = user_name
 
             aid.save()
 
+            # The progenitor is used to keep track of related archdesc and cXX entries
             progenitorID = aid.pk
 
             sortOrder = 0
             chronology = soup.find_all('chronitem')
-            for chron in chronology:
-                item = Chronology()
-                item.finding_aid_id = aid.pk
-                item.date = chron.date.string
-                item.event = chron.event.string
-                item.sort_order = sortOrder
-                item.save()
-                sortOrder = sortOrder + 1
+            if chronology:
+                for chron in chronology:
+                    item = Chronology()
+                    item.finding_aid_id = aid.pk
+                    item.date = chron.date.string
+                    item.event = chron.event.string
+                    item.sort_order = sortOrder
+                    item.save()
+                    sortOrder = sortOrder + 1
 
-                # after the aid is saved, other aspects of the finding aid can be associated
+                    # after the aid is saved, other aspects of the finding aid can be associated
 
-                # the language information probably needs to come down here
+                    # the language information probably needs to come down here
 
-                # <controlaccess>
-                # subheaders
-                #   <corpname>
-                #   <famname>
-                #   <function>
-                #   <genreform>
-                #   <geogname>
-                #   <occupation>
-                #   <persname>
-                #   <subject>
-                #   <title>
+                    # <controlaccess>
+                    # subheaders
+                    #   <corpname>
+                    #   <famname>
+                    #   <function>
+                    #   <genreform>
+                    #   <geogname>
+                    #   <occupation>
+                    #   <persname>
+                    #   <subject>
+                    #   <title>
 
             control = soup.find('controlaccess')
             if control:
                 entries = control.find_all('corpname')
-                for entry in entries:
-                    item = ControlAccess()
-                    item.finding_aid_id = progenitorID
-                    item.control_type = "corpname"
-                    item.term = entry.string
-                    if entry.has_attr('authfilenumber'):
-                        item.link = entry['authfilenumber']
-                    item.save()
+                if entries:
+                    for entry in entries:
+                        item = ControlAccess()
+                        item.finding_aid_id = progenitorID
+                        item.control_type = "corpname"
+                        item.term = entry.string
+                        if entry.has_attr('authfilenumber'):
+                            item.link = entry['authfilenumber']
+                        item.save()
                 entries = control.find_all('famname')
-                for entry in entries:
-                    item = ControlAccess()
-                    item.finding_aid_id = progenitorID
-                    item.control_type = "famname"
-                    item.term = entry.string
-                    if entry.has_attr('authfilenumber'):
-                        item.link = entry['authfilenumber']
-                    item.save()
+                if entries:
+                    for entry in entries:
+                        item = ControlAccess()
+                        item.finding_aid_id = progenitorID
+                        item.control_type = "famname"
+                        item.term = entry.string
+                        if entry.has_attr('authfilenumber'):
+                            item.link = entry['authfilenumber']
+                        item.save()
                 entries = control.find_all('function')
-                for entry in entries:
-                    item = ControlAccess()
-                    item.finding_aid_id = progenitorID
-                    item.control_type = "function"
-                    item.term = entry.string
-                    if entry.has_attr('authfilenumber'):
-                        item.link = entry['authfilenumber']
-                    item.save()
+                if entries:
+                    for entry in entries:
+                        item = ControlAccess()
+                        item.finding_aid_id = progenitorID
+                        item.control_type = "function"
+                        item.term = entry.string
+                        if entry.has_attr('authfilenumber'):
+                            item.link = entry['authfilenumber']
+                        item.save()
                 entries = control.find_all('genreform')
-                for entry in entries:
-                    item = ControlAccess()
-                    item.finding_aid_id = progenitorID
-                    item.control_type = "genreform"
-                    item.term = entry.string
-                    if entry.has_attr('authfilenumber'):
-                        item.link = entry['authfilenumber']
-                    item.save()
+                if entries:
+                    for entry in entries:
+                        item = ControlAccess()
+                        item.finding_aid_id = progenitorID
+                        item.control_type = "genreform"
+                        item.term = entry.string
+                        if entry.has_attr('authfilenumber'):
+                            item.link = entry['authfilenumber']
+                        item.save()
                 entries = control.find_all('geogname')
-                for entry in entries:
-                    item = ControlAccess()
-                    item.finding_aid_id = progenitorID
-                    item.control_type = "geogname"
-                    item.term = entry.string
-                    if entry.has_attr('authfilenumber'):
-                        item.link = entry['authfilenumber']
-                    item.save()
+                if entries:
+                    for entry in entries:
+                        item = ControlAccess()
+                        item.finding_aid_id = progenitorID
+                        item.control_type = "geogname"
+                        item.term = entry.string
+                        if entry.has_attr('authfilenumber'):
+                            item.link = entry['authfilenumber']
+                        item.save()
                 entries = control.find_all('occupation')
-                for entry in entries:
-                    item = ControlAccess()
-                    item.finding_aid_id = progenitorID
-                    item.control_type = "occupation"
-                    item.term = entry.string
-                    if entry.has_attr('authfilenumber'):
-                        item.link = entry['authfilenumber']
-                    item.save()
+                if entries:
+                    for entry in entries:
+                        item = ControlAccess()
+                        item.finding_aid_id = progenitorID
+                        item.control_type = "occupation"
+                        item.term = entry.string
+                        if entry.has_attr('authfilenumber'):
+                            item.link = entry['authfilenumber']
+                        item.save()
                 entries = control.find_all('persname')
-                for entry in entries:
-                    item = ControlAccess()
-                    item.finding_aid_id = progenitorID
-                    item.control_type = "persname"
-                    item.term = entry.string
-                    if entry.has_attr('authfilenumber'):
-                        item.link = entry['authfilenumber']
-                    item.save()
+                if entries:
+                    for entry in entries:
+                        item = ControlAccess()
+                        item.finding_aid_id = progenitorID
+                        item.control_type = "persname"
+                        item.term = entry.string
+                        if entry.has_attr('authfilenumber'):
+                            item.link = entry['authfilenumber']
+                        item.save()
                 entries = control.find_all('subject')
-                for entry in entries:
-                    item = ControlAccess()
-                    item.finding_aid_id = progenitorID
-                    item.control_type = "subject"
-                    item.term = entry.string
-                    if entry.has_attr('authfilenumber'):
-                        item.link = entry['authfilenumber']
-                    item.save()
+                if entries:
+                    for entry in entries:
+                        item = ControlAccess()
+                        item.finding_aid_id = progenitorID
+                        item.control_type = "subject"
+                        item.term = entry.string
+                        if entry.has_attr('authfilenumber'):
+                            item.link = entry['authfilenumber']
+                        item.save()
                 entries = control.find_all('title')
-                for entry in entries:
-                    item = ControlAccess()
-                    item.finding_aid_id = progenitorID
-                    item.control_type = "title"
-                    item.term = entry.string
-                    if entry.has_attr('authfilenumber'):
-                        item.link = entry['authfilenumber']
-                    item.save()
+                if entries:
+                    for entry in entries:
+                        item = ControlAccess()
+                        item.finding_aid_id = progenitorID
+                        item.control_type = "title"
+                        item.term = entry.string
+                        if entry.has_attr('authfilenumber'):
+                            item.link = entry['authfilenumber']
+                        item.save()
 
             # Once the control list is filled, add them to the finding aid through FindingAidSubjectHeader
+            # Needs to be implemented
                 
             # otherfindaid can be text or an extref link to another finding aid
             # There can be multiple subheaders or combinations thereof
@@ -418,13 +456,15 @@ class FindingAid(models.Model):
                     temp = entry.string
                     temp = entry['href']
 
-            # Process the component fields
+            # Process the component fields through a recursive function
             components_list = []
             c01s = soup.find_all("c01")
             for c01 in c01s:
                 FindingAid.ProcessComponents(soup, c01, progenitorID, progenitorID, 1)
 
             try:
+
+                # Index the processed portion of the EAD.  Each component is indexed separately.
 
                 source_url = filepath
                 destination_url = ""
@@ -441,6 +481,8 @@ class FindingAid(models.Model):
 
                     aid.save()
                 else:
+
+                    # Update an existing entry
                     record = {'doc':{'id': id, 'type': aid.aid_type, 'title': aid.title, 'repository': aid.repository, 'content': aid.scope_and_content, 'source': source_url, 'destination': ""}}
                     json_record = json.dumps(record)
 
@@ -451,6 +493,7 @@ class FindingAid(models.Model):
                 print(str(ex))
 
         except Exception as e:
+            print("Unable to process the " + filepath + " file " + str(e))
             response = "Unable to process the " + filepath + " file " + str(e)
 
         return response
@@ -464,6 +507,11 @@ class FindingAid(models.Model):
         # One way to possibly deal with this is to make sure the item's level matches the expected
         # level, meaning if we are parsing <c01> and the parent of an element is <c02>, we don't want
         # the data for that tag
+
+        # ToDo: There are assignments in place that assign a string from an element.  If there is a subfield
+        # within the string, the assignment is crashing.  For example some of the abstract elements in components
+        # of syr-wayland-smith_p.xml in the eaddiva files.
+
         did = soup.find('did')
         if not did:
             did = soup
@@ -473,6 +521,11 @@ class FindingAid(models.Model):
         title = did.find('unittitle')
         if FindingAid.legit_component(title, component_level):
             aid.title = title.string
+
+        if not aid.title:
+            searched_title = title.next
+            if searched_title:
+                aid.title = searched_title.string
 
         if not aid.title:
             subtitle = title.find('title')
@@ -561,13 +614,13 @@ class FindingAid(models.Model):
         # they may be contained in a <cXX>
 
         # There can be multiple accessrestrict entries
-        # aid.governing_access = String_or_p_tag(soup, 'accessrestrict')
-        governing_access = did.find_all('accessrestrict') 
-        if governing_access:
-            for entry in governing_access:
-                aid.governing_access = aid.governing_access + entry.get_text() + " "
-            aid.governing_access = cleanhtml(str(aid.governing_access))
-            aid.governing_access = aid.governing_access.strip()
+        aid.governing_access = String_or_p_tag(did, 'accessrestrict')
+        # governing_access = did.find_all('accessrestrict') 
+        # if governing_access:
+        #     for entry in governing_access:
+        #         aid.governing_access = aid.governing_access + entry.get_text() + " "
+        #     aid.governing_access = cleanhtml(str(aid.governing_access))
+        #     aid.governing_access = aid.governing_access.strip()
 
         aid.rights = String_or_p_tag(did, 'userestrict')
         aid.citation = String_no_p_tag(did, 'prefercite')
@@ -662,7 +715,7 @@ class FindingAid(models.Model):
     def GetFindingAidContents(id, contents):
         pass
 
-    def MARCIndex(id, repository, filepath):
+    def MARCIndex(id, repository, filepath, user_name):
 
         es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
@@ -686,52 +739,99 @@ class FindingAid(models.Model):
                 reader = MARCReader(marc_file)
                 for record in reader:
                     aid.title = record['245']['a']      # Title
+                    aid.title = cleanhtml(str(aid.title))
 
-                    f520 = True
                     try:
-                        content = record['520']['a']        # Summary
-                    except Exception as e:
-                        f520 = False
-
-                    if not f520:
+                        aid.creator = record['100']['a']      # "100, 110, or 111;"
+                        aid.creator = cleanhtml(aid.creator)
+                    except:
                         try:
-                            content = record['545']['a']    # Biographical or Historical Data
+                            aid.creator = record['110']['a']
+                            aid.creator = cleanhtml(aid.creator)
+                        except:
+                            try:
+                                aid.creator = record['111']['a']
+                                aid.creator = cleanhtml(aid.creator)
+                            except:
+                                aid.creator = ""
+
+                    try:
+                        aid.reference_code = record['099']  # Call Number
+                        aid.reference_code = cleanhtml(aid.reference_code)
+                    except Exception as e:
+                        aid.reference_code = ""
+
+                    try:
+                        aid.extent = record['300']['a']
+                        aid.extent = cleanhtml(aid.extent)
+                    except Exception as e:
+                        aid.extent = ""
+
+                    try:
+                        aid.languages = record['546']
+                        aid.languages = cleanhtml(aid.languages)
+                    except Exception as e:
+                        aid.languages = ""
+
+                    try:
+                        aid.citation = record['852']
+                        aid.citation = cleanhtml(aid.citation)
+                    except Exception as e:
+                        try:
+                            aid.citation =  record['524']
+                            aid.citation = cleanhtml(aid.citation)
                         except Exception as e:
-                            pass
+                            aid.citation = ""
+                    
+                    try:
+                        aid.governing_access = record['506']
+                        aid.governing_access = cleanhtml(aid.governing_access)
+                    except Exception as e:
+                        aid.governing_access = ""
 
+                    try:
+                        aid.scope_and_content = record['520']
+                        aid.scope_and_content = cleanhtml(aid.scope_and_content)
+                    except Exception as e:
+                        aid.scope_and_content = ""
 
-                    # print(record['040']['a']) # Cataloging Source
-                    # print(record['545']['a']) # Biographical or Historical Data
+                    try:
+                        aid.bioghist = record['545']['a']        # Biographical or Historical Data
+                        aid.bioghist = cleanhtml(aid.bioghist)
+                    except Exception as e:
+                        aid.bioghist = ""
 
-                # Create a json object to index into ElasticSearch
-                aid.title = cleanhtml(str(aid.title))
-                source_url = filepath
-                destination_url = ""
-                content = cleanhtml(str(content))
-                aid.scope_and_content = content
+                    # Mark the indexing date and the user who did the indexing
+                    today = date.today()
+                    aid.last_update = today.strftime("%B %d, %Y")
+                    aid.updated_by = user_name
 
-                try:
+                    # Create a json object to index into ElasticSearch
+                    source_url = filepath
+                    destination_url = ""
 
-                    if id == "new":
+                    try:
 
-                        record = {'id': aid.pk, 'type': aid.aid_type, 'title': aid.title, 'repository': aid.repository, 'content': aid.scope_and_content, 'source': source_url, 'destination': destination_url}
-                        json_record = json.dumps(record)
+                        if id == "new":
 
-                        outcome = es.index(index='nafan', doc_type='_doc', body=json_record)
-                        elasticsearch_id = outcome['_id']
+                            record = {'id': aid.pk, 'type': aid.aid_type, 'title': aid.title, 'repository': aid.repository, 'content': aid.bioghist, 'source': source_url, 'destination': destination_url}
+                            json_record = json.dumps(record)
 
-                        aid.elasticsearch_id = elasticsearch_id
+                            outcome = es.index(index='nafan', doc_type='_doc', body=json_record)
+                            elasticsearch_id = outcome['_id']
 
-                        aid.save()
-                    else:
-                        record = {'doc':{'id': id, 'type': aid.aid_type, 'title': aid.title, 'repository': aid.repository, 'content': aid.scope_and_content, 'source': source_url, 'destination': destination_url}}
-                        json_record = json.dumps(record)
+                            aid.elasticsearch_id = elasticsearch_id
 
-                        es.update(id=aid.elasticsearch_id, index='nafan', doc_type='_doc', body=json_record)
+                            aid.save()
+                        else:
+                            record = {'doc':{'id': id, 'type': aid.aid_type, 'title': aid.title, 'repository': aid.repository, 'content': aid.scope_and_content, 'source': source_url, 'destination': destination_url}}
+                            json_record = json.dumps(record)
 
-                except Exception as ex:
-                    print('Error in indexing data')
-                    print(str(ex))
+                            es.update(id=aid.elasticsearch_id, index='nafan', doc_type='_doc', body=json_record)
+
+                    except Exception as ex:
+                        print('Error in indexing data')
+                        print(str(ex))
 
             except Exception as e:
                 response = "Unable to process the " + filepath + " file " + str(e)
@@ -873,6 +973,7 @@ class FindingAid(models.Model):
 
         aid = FindingAid()
         aid.aid_type = "ead"
+        # aid.aid_type = "pdf"
         aid.repository = repository
         aid.name_and_location = repository
 
@@ -883,9 +984,7 @@ class FindingAid(models.Model):
 
         return response
 
-    def HarvestEAD(url, repository):
-
-        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+    def HarvestEAD(url, repository, user_name):
 
         # url = 'https://eadiva.com/sampleEAD'
         ext = "xml"
@@ -908,60 +1007,9 @@ class FindingAid(models.Model):
             html_doc = r.text
             soup = BeautifulSoup(html_doc, 'html.parser')
 
-            # Create a json object to index into ElasticSearch
-            # aid.title = soup.select('titleproper')[0].text.strip()
-            # aid.title = cleanhtml(str(aid.title))
-            aid.title = soup.find("titleproper").contents
-            aid.title = cleanhtml(str(aid.title))
-            source_url = url
-            destination_url = ""
+            response = FindingAid.MakeEAD("new", soup, aid, user_name, url)
 
-            # content = soup.select('bioghist')[0].text.strip()
-            # content = cleanhtml(str(content))
-            # aid.scope_and_content = content
-
-            content = soup.find("scopecontent").contents
-            content = cleanhtml(str(content))
-            aid.scope_and_content = content
-
-            aid.reference_code = soup.find("unitid").contents
-            aid.reference_code = cleanhtml(str(aid.reference_code))
-
-            aid.extent = soup.find("extent").contents
-            aid.extent = cleanhtml(str(aid.extent))
-
-            aid.creator = soup.find("origination").contents
-            aid.creator = cleanhtml(str(aid.creator))
-
-            aid.date = soup.find("unitdate").contents
-            aid.date = cleanhtml(str(aid.date))
-
-            aid.languages = soup.find("langmaterial").contents
-            aid.languages = cleanhtml(str(aid.languages))
-
-            # aid.rights = soup.find("userestrict").contents
-            # aid.rights = cleanhtml(str(aid.rights))
-
-            aid.governing_access = soup.find("userestrict").contents
-            aid.rights = cleanhtml(str(aid.rights))
-
-            aid.save()
-
-            try:
-
-                record = {'id': aid.pk, 'type': aid.aid_type, 'title': aid.title, 'repository': aid.repository, 'content': aid.scope_and_content, 'source': source_url, 'destination': destination_url}
-                json_record = json.dumps(record)
-
-                outcome = es.index(index='nafan', doc_type='_doc', body=json_record)
-                elasticsearch_id = outcome['_id']
-
-                aid.elasticsearch_id = elasticsearch_id
-
-                aid.save()
-
-            except Exception as ex:
-                print('Error in indexing data')
-                print(str(ex))
+        return response
 
     def HarvestOAI(url, repository):
 
@@ -1601,18 +1649,19 @@ def String_or_p_tag(soup, tag):
     element = soup.find(tag)
     if element:
 
-        div_bs4 = element.find('head')
+        # div_bs4 = element.find('head')
                 
-                # # delete the child element
-        if div_bs4:
-            div_bs4.clear()
+        # # # delete the child element
+        # if div_bs4:
+        #     div_bs4.clear()
 
-        response = element.string
+        # response = element.string
 
-        # If the return_value is blank, see if they put in a <p> entries
-        if not response:
-            response = str(element)
-            # response = element.p.string
+        # # If the return_value is blank, see if they put in a <p> entries
+        # if not response:
+        #     response = str(element)
+
+        response = element.get_text()
 
     if not response:
         response = ""
