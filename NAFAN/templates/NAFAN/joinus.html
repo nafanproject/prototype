@@ -20,8 +20,10 @@
      <style>
 
 
+
 .page-header {
-    color: #5cb85c;
+    color: #008080;
+    margin-left: 10px;
   }
 
 .message {
@@ -33,6 +35,13 @@
   margin-bottom:10px;
   margin-left: 10px;
   margin-right: 10px;
+}
+
+.subheader { 
+  margin-top:0; 
+  margin-bottom:0;
+  margin-left: 30px;
+  margin-right: 0;
 }
 
 .grid-buffer { 
@@ -48,6 +57,14 @@
 
 ul {
   list-style-type: none;
+  margin: 10;
+  padding: 10;
+  overflow: hidden;
+}
+
+li {
+  display: inline-block;
+  padding: 10px 30px;
 }
 
 select {
@@ -75,6 +92,11 @@ h3.section_title {
   display: inline-block;
   margin: 10px 0 15px 0;
   padding: 0;
+}
+
+.links_text {
+  font-family: "Open Sans", Helvetica, Arial, san-serif;
+  font-size: 12px;
 }
 
 svg.icon_spacer {
@@ -155,6 +177,20 @@ button.manage_button {
 .field_caption {
   color: cadetblue;
 }
+
+.parent {
+  display: table;
+}
+.parent > ul {
+  display: table-row;
+}
+.parent > ul > li {
+  display: table-cell;
+  padding: 0 30px 0 30px;
+}
+img {
+  max-width: 100px;
+}
     </style>
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js">  </script>    
@@ -169,29 +205,33 @@ button.manage_button {
 
   <div class="row top-buffer">
 
-      <div class="col-sm-4">
-          <a href="/newToNAFAN"></a>
+      <div class="col-sm-2">
       </div>
 
-      <div class="col-sm-4">
-        <h2 class="page-header text-center">Join Us</h2>
-      </div>
+      <div class="col-sm-8">
 
-      <div class="col-sm-4">
-          <a class="float-right" href="/">Main</a>
+        <div class="media" id="NAFAN_header">
+            <span class="media-left">
+                <img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/nafanlogo2.jpg" alt="Logo">
+            </span>
+            <div class="media-body">
+                <h2 class="page-header ">NAFAN Demonstration Prototype</h2>
+                <h5><span class="subheader">Public User Interface</span></h5>
+            </div>
+        </div>
       </div>
       
-  </div>
+      <div class="col-sm-2">
+      </div>
 
 	<div class="row justify-content-center">
     <div class="col-12 col-md-10 col-lg-8">
 
         <div id="index_notes">
             <p></p>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor 
-            in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, 
-            sunt in culpa qui officia deserunt mollit anim id est laborum.
+            <p>Any US-based cultural heritage organization can elect to publish information about the repository and/or share collection guides. To become a new contributor, the organization would complete a simple sign-up process. 
+            </p>
+            <p>The following information would be used by the NAFAN product/service team to collect information sufficient to establish a user account for the key contact(s) at the organization, where the account is also associated with a repository record (that can be subsequently edited by the organization).
             </p>
         </div>
         
@@ -231,17 +271,12 @@ button.manage_button {
                 </div>
 
                 <div class="form_field_container">
-                    <label class="form_label">Please provide a brief summary of the scope of your collection guides: </label>
+                    <label class="form_label">Summary/scope of your organization's collection emphases:</label>
                     {{ form.collection_guides }}
                 </div>
 
-                <div class="form_field_container">
-                    <label class="form_label">Additional message for NAFAN: </label>
-                    {{ form.message }}
-                </div>
-
                 <br/>
-                <button type="submit" class="btn btn-primary manage_button" id="submit"><span class="fal fa-ticket-alt icon_spacer"></span> Submit</button>
+                  <input type="submit" value="Submit" />
                 <br/>
        
             </div>
@@ -255,4 +290,11 @@ button.manage_button {
 </div>
 
 </body>
+
+<script>
+  $("#NAFAN_header").click(function() {
+      location.href = "/index";
+  });
+</script>
+
 </html>

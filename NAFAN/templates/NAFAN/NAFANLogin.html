@@ -19,9 +19,9 @@
  
      <style>
 
-
 .page-header {
-    color: #5cb85c;
+    color: #008080;
+    margin-left: 10px;
   }
 
 .message {
@@ -33,6 +33,13 @@
   margin-bottom:10px;
   margin-left: 10px;
   margin-right: 10px;
+}
+
+.subheader { 
+  margin-top:0; 
+  margin-bottom:0;
+  margin-left: 30px;
+  margin-right: 0;
 }
 
 .grid-buffer { 
@@ -48,6 +55,14 @@
 
 ul {
   list-style-type: none;
+  margin: 10;
+  padding: 10;
+  overflow: hidden;
+}
+
+li {
+  display: inline-block;
+  padding: 10px 30px;
 }
 
 select {
@@ -75,6 +90,11 @@ h3.section_title {
   display: inline-block;
   margin: 10px 0 15px 0;
   padding: 0;
+}
+
+.links_text {
+  font-family: "Open Sans", Helvetica, Arial, san-serif;
+  font-size: 12px;
 }
 
 svg.icon_spacer {
@@ -155,6 +175,20 @@ button.manage_button {
 .field_caption {
   color: cadetblue;
 }
+
+.parent {
+  display: table;
+}
+.parent > ul {
+  display: table-row;
+}
+.parent > ul > li {
+  display: table-cell;
+  padding: 0 30px 0 30px;
+}
+img {
+  max-width: 100px;
+}
     </style>
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js">  </script>    
@@ -173,13 +207,20 @@ button.manage_button {
       </div>
 
       <div class="col-sm-8">
-        <h2 class="page-header text-center">Login</h2>
-      </div>
 
-      <div class="col-sm-2">
-          <a class="float-right" href="/">Main</a>
+        <div class="media" id="NAFAN_header">
+            <span class="media-left">
+                <img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/nafanlogo2.jpg" alt="Logo">
+            </span>
+            <div class="media-body">
+                <h2 class="page-header ">NAFAN Demonstration Prototype</h2>
+                <h5><span class="subheader">Public User Interface</span></h5>
+            </div>
+        </div>
       </div>
       
+      <div class="col-sm-2">
+      </div>      
     </div>
 
 	<div class="row justify-content-center">
@@ -187,14 +228,25 @@ button.manage_button {
 
         <div id="index_notes">
             <p></p>
-            <p>The theory for the Login page is that all users that have a login come through this page and upon successful login are
-               redirected to the appropriate landing page.  Note the addition of contributor admin.  Persons with this role are 
-               responsible for maintaining the contributors for a repository.  This means further in the administration area they can
-               add and remove users for their associated repositories.  They can add other admins, but the initial admin for a repository
-               has to be done by a NAFAN admin after verification.
+            <p>Once an organization has been established as a contributor, the key contact(s) will receive 
+               user accounts from the NAFAN product/service team. These accounts can then be used to log into 
+               a Contributor Dashboard
             </p>
-            <p>I believe using an email for the username is appropriate because it is unique and easy for the user to remember.</p>
-            <p>An appropriate password strength can be determined and implemented.</p>
+            <ul>
+              <li><b>Contributor administrators</b> accounts have permissions to update repository information, 
+              contribute collection guides, and establish additional user accounts for staff and volunteers 
+              in their organization.</li>
+              <li><b>Contributor</b> accounts have permissions to update repository information and contribute 
+              collection guides.</li>
+              <li><b>NAFAN administrator</b> accounts are utilized by NAFAN product/service team members.</li>
+            </ul>
+
+            <p>The following are test logins for the roles envisioned.</p>
+            <ul>
+              <li><b>Contributor administrators:</b> contributoradmin@nafan.com/passwerd</li>
+              <li><b>Contributor:</b> contributor@nafan.com/passwerd</li>
+            </ul>
+
         </div>
 
         <div class="row">
@@ -212,8 +264,8 @@ button.manage_button {
             <form method="post">
                 {% csrf_token %}
 
-                <div class="form_field_container">
-                  <label class="form_label">User Name </label>
+                <div>
+                  <b>Username:</b>
                     {{ form.email }}
                 </div>
             
@@ -224,37 +276,23 @@ button.manage_button {
 
                 <input type="submit" value="Login" />
 
-                <button class="btn btn-md btn-primary float-right" type="button" onclick="location.href='/forgot_password'">Forgot Password</button>
-
-                <br/><br/>
-
-
                 <strong>{{ login_message }}</strong>
-
-               <p>The following are test logins for the roles envisioned.</p>
-                <ul>
-                  {% comment %} <li>researcher@nafan.com/passwerd</li> {% endcomment %}
-                  <li>contributoradmin@nafan.com/passwerd</li>
-                  <li>contributor@nafan.com/passwerd</li>
-                  <li>admin@nafan.com/passwerd</li>
-                </ul>
                 
               </form>
         
           <div>
 
-          <div class="col-sm-2">
-          </div>
-
-              <div class="col-sm-12">
-
-
-              </div>
-              
         </div>
       </div>
     </div>
   </div>
 
 </body>
+
+<script>
+  $("#NAFAN_header").click(function() {
+      location.href = "/index";
+  });
+</script>
+
 </html>

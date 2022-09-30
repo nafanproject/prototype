@@ -14,150 +14,179 @@
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'site.css' %}"/>
 
-     <style>
-
+    <style>
 
 .page-header {
-    color: #5cb85c;
-  }
+  color: #008080;
+  margin-left: 10px;
+}
 
 .message {
-  color: cadetblue;
+color: cadetblue;
 }
 
 .top-buffer { 
-  margin-top:20px; 
-  margin-bottom:10px;
-  margin-left: 10px;
-  margin-right: 10px;
+margin-top:20px; 
+margin-bottom:10px;
+margin-left: 10px;
+margin-right: 10px;
+}
+
+.subheader { 
+margin-top:0; 
+margin-bottom:0;
+margin-left: 30px;
+margin-right: 0;
 }
 
 .grid-buffer { 
-  margin-bottom:10px;
-  margin-left: 10px;
-  margin-right: 10px;
+margin-bottom:10px;
+margin-left: 10px;
+margin-right: 10px;
 }
 
 #id_username,
 #id_password {
-  width: 300px;
+width: 300px;
 }
 
 ul {
-  list-style-type: none;
+list-style-type: none;
+margin: 10;
+padding: 10;
+overflow: hidden;
+}
+
+li {
+display: inline-block;
+padding: 10px 30px;
 }
 
 select {
-  border:1px solid #ccc;
-  vertical-align:top;
-  height:30px;
+border:1px solid #ccc;
+vertical-align:top;
+height:30px;
 }
 
 .manage_page_container {
-  margin: 0 0 20px 0;
-  padding: 0;
-  display: block;
-  overflow: hidden;
+margin: 0 0 20px 0;
+padding: 0;
+display: block;
+overflow: hidden;
 }
 
 .background_content {
-  background-color: #ffff;
-  /* border: 1px solid #ced4da; */
+background-color: #ffff;
+/* border: 1px solid #ced4da; */
 }
 
 h3.section_title {
-  font-family: "Open Sans", Helvetica, Arial, san-serif;
-  font-size: 30px;
-  color:#5cb85c;
-  display: inline-block;
-  margin: 10px 0 15px 0;
-  padding: 0;
+font-family: "Open Sans", Helvetica, Arial, san-serif;
+font-size: 30px;
+color:#5cb85c;
+display: inline-block;
+margin: 10px 0 15px 0;
+padding: 0;
+}
+
+.links_text {
+font-family: "Open Sans", Helvetica, Arial, san-serif;
+font-size: 12px;
 }
 
 svg.icon_spacer {
-  display: inline-block;
-  margin-right: 5px;
+display: inline-block;
+margin-right: 5px;
 }
 
 .form_field_container {
-  margin: 0 0 10px 0;
-  display:block;
-  overflow:hidden;
+margin: 0 0 10px 0;
+display:block;
+overflow:hidden;
 }
 
 label.form_label {
-  width: auto;
-  font-weight: 600;
-  margin: 5px 10px 0 0;
-  display: block;
-  overflow: hidden;
+width: auto;
+font-weight: 600;
+margin: 5px 10px 0 0;
+display: block;
+overflow: hidden;
 }
 
 input.medium_field,
 select.medium_field {
-  width: 200px !important;
+width: 200px !important;
 }
 
 input.large_field,
 select.large_field {
-  width: 300px !important;
+width: 300px !important;
 }
 
 input.ex_large_field,
 select.ex_large_field {
-  width: 500px !important;
+width: 500px !important;
 }
 
 input.manage_search {
-  float: left;
-  width: 300px;
-  margin: 0 10px, 0 0;
+float: left;
+width: 300px;
+margin: 0 10px, 0 0;
 }
 
 select.manage_search {
-  float: left;
-  margin: 0 20px, 0 0;
+float: left;
+margin: 0 20px, 0 0;
 }
 
 button.manage_search {
-  float: left;
-  background-color: #2371c3;
-  border-color: #2371c3;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  margin: 0;
-  margin-left: 5px;
-  cursor: pointer;
+float: left;
+background-color: #2371c3;
+border-color: #2371c3;
+border-top-left-radius: 0;
+border-bottom-left-radius: 0;
+margin: 0;
+margin-left: 5px;
+cursor: pointer;
 }
 
 input.search_field {
-  height: 30px;
-  border-right: none;
+height: 30px;
+border-right: none;
 }
 
 .button_container {
-  display: inline-block;
-  overflow: hidden;
-  margin: 0 0 0, 20px;
-  padding: 0;
+display: inline-block;
+overflow: hidden;
+margin: 0 0 0, 20px;
+padding: 0;
 }
 
 button.manage_button {
-  float: left;
-  margin-right: 10px;
-  display: block;
-  overflow: hidden;
+float: left;
+margin-right: 10px;
+display: block;
+overflow: hidden;
 }
 
 .field_caption {
-  color: cadetblue;
+color: cadetblue;
 }
 
-.h-scroll {
-    height: 90vh; /* %-height of the viewport */
-    position: fixed;
-    overflow-y: scroll;
+.parent {
+display: table;
 }
+.parent > ul {
+display: table-row;
+}
+.parent > ul > li {
+display: table-cell;
+padding: 0 30px 0 30px;
+}
+img {
+max-width: 100px;
+}
+
     </style>
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
@@ -171,21 +200,28 @@ button.manage_button {
 
 <div class="container_fluid">
 
-  <div class="row top-buffer">
+    <div class="row top-buffer">
 
-    <div class="col-sm-2">
-      <h2>{{ aid.repository}}</h2>
-    </div>
+      <div class="col-sm-2">
+      </div>
 
-    <div class="col-sm-8">
-      {% comment %} <h2 class="page-header text-center"> Finding Aids </h2> {% endcomment %}
-    </div>
+      <div class="col-sm-8">
 
-    <div class="col-sm-2">
-      <a class="float-right" href="/">Main</a>
-    </div>
+        <div class="media" id="NAFAN_header">
+            <span class="media-left">
+                <img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/nafanlogo2.jpg" alt="Logo">
+            </span>
+            <div class="media-body">
+                <h2 class="page-header ">NAFAN Demonstration Prototype</h2>
+                <h5><span class="subheader">Public User Interface</span></h5>
+            </div>
+        </div>
+      </div>
       
-  </div>
+      <div class="col-sm-2">
+      </div>
+      
+    </div>
 
   <div class="row justify-content-left grid-buffer">
 
@@ -246,6 +282,12 @@ button.manage_button {
               <li class="nav-item">
                 <a class="nav-link" id="details_tab" href="#">Details</a>
               </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{repository.DPLA}}" target='_blank'>View online items</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/Repository_Info/{{ repository.repository_name }}">Contact Contributing Archive</a>
+              </li>
             </ul>
 
                   <div class="form_field_container">
@@ -265,7 +307,7 @@ button.manage_button {
                       <div class="col-md-3 text-right"><b>Preferred Citation</b></div>
                       <div class="col-md-9 text-left">{{ aid.citation }}</div>
                       <div class="col-md-3 text-right"><b>Repository</b></div>
-                      <div class="col-md-9 text-left">{{ aid.intra_repository }}</div>
+                      <div class="col-md-9 text-left"><a href="/Repository_Info/{{ repository.repository_name }}">{{ aid.intra_repository }}</a></div>
                       <div class="col-md-3 text-right"><b>Access to materials</b></div>
                       <div class="col-md-9 text-left">Request an in-person research appointment.</div>
                   </div>
@@ -462,5 +504,9 @@ $( "#xdetails_tab" ).click(function() {
   $('.overview_li').hide();
   $('#details').show();
 });
+
+  $("#NAFAN_header").click(function() {
+      location.href = "/index";
+  });
 
 </script>
