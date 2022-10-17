@@ -17,21 +17,6 @@ The following libraries are used.  These are listed in the requirements.txt file
 - requests
 - sickle
 
-Roles:
-
-nafan_admin
-This role represents an internal NAFAN administrator.  These users log into the nafan_admin.html page and view a list of join requests.  They can add users to any repository and add additional NAFAN admins.  They are able to perform all repository and finding aid actions for an institution, although with the findings in the Shift Collective report leaving this capability in place is problematic.
-
-contributor_admin
-This role represents the primary contacts for a repository. These users log into the contributor_admin.html page. Once established by the NAFAN admin, they can create other users from their assigned repositories and assign any repositories the are currently assigned to their users.  They are able to edit information about their repositories and create and modify finding aids.
-
-contributor
-This role is for people who only work on finding aids.  When they log in, they are directed to the finding aid page where they can create and modify finding aids.  On that page if they are assigned more than one repository, a drop down is shown displaying the repositories so they can switch among them.
-
-researcher
-This role is defined in the code but as of yet has no special use.
-
-
 Database Preparation:
 
 To populate users, there needs to be one user in the NAFAN_nafanuser table with the user_type set to nafan_admin.  Thereafter, that user can set up everything within the application.  One change that has to happen is that the passwords in the database are not encrypted as yet.  Obviously this needs to change for any sort of production environment.
