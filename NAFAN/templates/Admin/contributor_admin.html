@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,202 +9,301 @@
     {% block title %}<title>NAFAN - The National Finding Aid Network</title>{% endblock %}
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" rel="stylesheet">
-
-    <!-- Add additional CSS in static file -->
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'NAFAN/site.css' %}"/>
 
     <script type="text/javascript">
       NAFAN = {};
-      NAFAN.DefaultID = -1;
     </script>
- 
-      <style>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js">  </script>    
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">  </script>     
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"rel="stylesheet" type="text/css" />  
 
+    {% comment %} Won't apply this for some reason {% endcomment %}
+    <link rel="stylesheet" href="https://raw.githubusercontent.com/nafanproject/prototype/master/NAFAN/static/site.css" type="text/css"/>
+
+    <style>
 
 .page-header {
-    color: #5cb85c;
-  }
+  color: #008080;
+  margin-left: 10px;
+}
 
 .message {
-  color: cadetblue;
+color: cadetblue;
 }
 
 .top-buffer { 
-  margin-top:20px; 
-  margin-bottom:10px;
-  margin-left: 10px;
-  margin-right: 10px;
+margin-top:20px; 
+margin-bottom:10px;
+margin-left: 10px;
+margin-right: 10px;
+}
+
+.subheader { 
+margin-top:0; 
+margin-bottom:0;
+margin-left: 10px;
+margin-right: 0;
+}
+
+.aid_data {
+margin-top:0; 
+margin-bottom:10px;
+margin-left: 0px;
+margin-right: 0;
 }
 
 .grid-buffer { 
-  margin-bottom:10px;
-  margin-left: 10px;
-  margin-right: 10px;
+margin-bottom:10px;
+margin-left: 10px;
+margin-right: 10px;
 }
 
 #id_username,
 #id_password {
-  width: 300px;
-}
-
-ul {
-  list-style-type: none;
+width: 300px;
 }
 
 select {
-  border:1px solid #ccc;
-  vertical-align:top;
-  height:30px;
+border:1px solid #ccc;
+vertical-align:top;
+height:30px;
 }
 
 .manage_page_container {
-  margin: 0 0 20px 0;
-  padding: 0;
-  display: block;
-  overflow: hidden;
+margin: 0 0 20px 0;
+padding: 0;
+display: block;
+overflow: hidden;
 }
 
 .background_content {
-  background-color: #ffff;
-  /* border: 1px solid #ced4da; */
+background-color: #ffff;
+/* border: 1px solid #ced4da; */
 }
 
 h3.section_title {
-  font-family: "Open Sans", Helvetica, Arial, san-serif;
-  font-size: 30px;
-  color:#5cb85c;
-  display: inline-block;
-  margin: 10px 0 15px 0;
-  padding: 0;
+font-family: "Open Sans", Helvetica, Arial, san-serif;
+font-size: 30px;
+color:#008080;
+display: inline-block;
+margin: 10px 0 15px 0;
+padding: 0;
+}
+
+.links_text {
+font-family: "Open Sans", Helvetica, Arial, san-serif;
+font-size: 12px;
 }
 
 svg.icon_spacer {
-  display: inline-block;
-  margin-right: 5px;
+display: inline-block;
+margin-right: 5px;
 }
 
 .form_field_container {
-  margin: 0 0 10px 0;
-  display:block;
-  overflow:hidden;
+margin: 0 0 10px 0;
+display:block;
+overflow:hidden;
 }
 
 label.form_label {
-  width: auto;
-  font-weight: 600;
-  margin: 5px 10px 0 0;
-  display: block;
-  overflow: hidden;
+width: auto;
+font-weight: 600;
+margin: 5px 10px 0 0;
+display: block;
+overflow: hidden;
 }
 
 input.medium_field,
 select.medium_field {
-  width: 200px !important;
+width: 200px !important;
 }
 
 input.large_field,
 select.large_field {
-  width: 300px !important;
+width: 300px !important;
 }
 
 input.ex_large_field,
 select.ex_large_field {
-  width: 500px !important;
+width: 500px !important;
 }
 
 input.manage_search {
-  float: left;
-  width: 300px;
-  margin: 0 10px, 0 0;
+float: left;
+width: 300px;
+margin: 0 10px, 0 0;
 }
 
 select.manage_search {
-  float: left;
-  margin: 0 20px, 0 0;
+float: left;
+margin: 0 20px, 0 0;
 }
 
 button.manage_search {
-  float: left;
-  background-color: #2371c3;
-  border-color: #2371c3;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  margin: 0;
-  margin-left: 5px;
-  cursor: pointer;
+float: left;
+background-color: #2371c3;
+border-color: #2371c3;
+border-top-left-radius: 0;
+border-bottom-left-radius: 0;
+margin: 0;
+margin-left: 5px;
+cursor: pointer;
 }
 
 input.search_field {
-  height: 30px;
-  border-right: none;
+height: 30px;
+border-right: none;
 }
 
 .button_container {
-  display: inline-block;
-  overflow: hidden;
-  margin: 0 0 0, 20px;
-  padding: 0;
+display: inline-block;
+overflow: hidden;
+margin: 0 0 0, 20px;
+padding: 0;
 }
 
 button.manage_button {
-  float: left;
-  margin-right: 10px;
-  display: block;
-  overflow: hidden;
+float: left;
+margin-right: 10px;
+display: block;
+overflow: hidden;
 }
 
 .field_caption {
-  color: cadetblue;
+color: cadetblue;
 }
+
+.parent {
+  display: table;
+}
+.parent > ul {
+  display: table-row;
+}
+.parent > ul > li {
+  display: table-cell;
+  padding: 0 30px 0 30px;
+}
+
+.related > li {
+  margin-left: -16px;
+  margin-bottom: -16px;
+  display: block;
+  list-style-type: circle;
+}
+
+img {
+max-width: 100px;
+}
+
     </style>
-    
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">  </script> 
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>    
-    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"rel="stylesheet" type="text/css" />  
 
 </head>
 
 <body>
 
-<div class="container_fluid">
+<div class="container-fluid">
 
-  <div class="row top-buffer">
 
-      <div class="col-sm-2">
-      </div>
+    <div class="row top-buffer">
 
-      <div class="col-sm-8">
-         <h2 class="page-header text-center">Contributer Admin</h2>
-     </div>
+        <div class="col-lg-12">
+          <div class="media" id="NAFAN_header">
+              <span class="media-left">
+                  <img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/nafanlogo1.jpg" alt="Logo">
+              </span>
+              <div class="media-body">
+                  <h2 class="page-header">NAFAN Demonstration Prototype</h2>
+                  <h5><span class="subheader">Contributor Dashboard</span></h5>
+              </div>
+          </div>
+        </div>
 
-      <div class="col-sm-2">
-          <button class="btn btn-md btn-primary float-right" type="button" onclick="location.href='/logout'">Logout</button>
-      </div>
+    </div>
+    
+        <div class="row top-buffer">
+
+        <div class="col-sm-3">
+        </div>
+
+      <div class="col-sm-7">
+            <h2 class="page-header text-center"> Dashboard Home </h2>
+        </div>
+
+        <div class="col-sm-2">
+            <button class="btn btn-md btn-primary float-right" type="button" onclick="location.href='/logout'">Logout</button>
+        </div>
       
-  </div>
+    </div>
 
 	<div class="row justify-content-center">
+        
+        <div class="col-12 col-md-10 col-lg-8 parent">
+        <p>The Contributor Dashboard is intended to serve as a locus for logged-in contributors to manage and update information about their repository, manage and update user accounts (e.g., for staff and volunteers associated with the archive), and contribute collection guides.
+        </p>
+        </div>
+
+        <div class="col-12 col-md-10 col-lg-8 parent">
+            <ul class="text-center">
+              <li><a href='http://nafan-devvm.village.virginia.edu/Repositories/repositories'><span class="links_text">Sample repository record and collection</span><br/><span class="links_text">guide management</span></a></li>
+              <li><a href='http://nafan-devvm.village.virginia.edu/Users/users'><span class="links_text">Sample user account management</span></a></li>
+              <li><a href='http://nafan-devvm.village.virginia.edu/Admin/audit'><span class="links_text">Sample user activity reports</span></a></li>
+            </ul>
+            <ul class="text-center">
+              <li><a href='http://nafan-devvm.village.virginia.edu/Repositories/repositories'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/repository_record.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href='http://nafan-devvm.village.virginia.edu/Users/users'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/user_accounts.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href='http://nafan-devvm.village.virginia.edu/Admin/audit'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/activity_reports.jpg" alt="Logo" height="50" width="50"></a></li>
+            </ul>
+        </div>
+
+        {% comment %} <div class="col-12 col-md-10 col-lg-8">
+          <p>&nbsp;</p>
+        </div>
+
+        <div class="col-12 col-md-10 col-lg-8 parent">
+            <ul class="text-center">
+              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/ingest_pdf '><span class="links_text">Sample process for creating a collection guide </span><br/><span class="links_text">(NAFAN-hosted PDF attachment option)</span></a></li>
+              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/ingest_ead'><span class="links_text">Sample process for uploading a </span><br/><span class="links_text">collection guide (NAFAN-hosted EAD)</span></a></li>
+              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/ingest_marc'><span class="links_text">Sample process for uploading a </span><br/><span class="links_text">collection guide (NAFAN-hosted MARC)</span></a></li>
+            </ul>
+            <ul class="text-center">
+              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/ingest_pdf'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_pdf.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/ingest_ead'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_ead.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/ingest_marc'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_marc.jpg" alt="Logo" height="50" width="50"></a></li>
+            </ul>
+        </div>
+
         <div class="col-12 col-md-10 col-lg-8">
+          <p>&nbsp;</p>
+        </div>
 
-          <b><a href="/Repositories/repositories">Repositories</a></b>&nbsp;&nbsp;&nbsp;&nbsp;
-          <b><a href="/Users/users">Users</a></b>&nbsp;&nbsp;&nbsp;&nbsp;
-          <b><a href="/Admin/audit">Audit</a></b>&nbsp;&nbsp;&nbsp;&nbsp;
-          
-          </br></br>
-          <p>First time a contributor admin logs in, they are presented with a Terms of Service agreement and a
-             welcome message.
-          </p>
+        <div class="col-12 col-md-10 col-lg-8 parent">
+            <ul class="text-center">
+              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/create_harvest_profile'><span class="links_text">Sample process for harvesting a</span><br/><span class="links_text">collection guide (locally-hosted)</span></a></li>
+            </ul>
+            <ul class="text-center">
+              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/create_harvest_profile'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_local.jpg" alt="Logo" height="50" width="50"></a></li>
+            </ul>
+        </div>
 
-          <p>Thereafter, directions, contributor messages, and whatnot can be displayed
-          </p>
+        <div class="col-12 col-md-10 col-lg-8">
+          <p>&nbsp;</p>
+        </div> {% endcomment %}
 
-      </div>
+        <div class="col-12 col-md-10 col-lg-8">
+            <footer>
+            </footer>
+        </div>
   </div>
 
 </div>
-
 </body>
+
+<script>
+  $("#NAFAN_header").click(function() {
+      location.href = "/contributor_admin";
+  });
+</script>
+
 </html>

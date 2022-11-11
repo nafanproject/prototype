@@ -17,7 +17,6 @@
      <style>
 
 
-
 .page-header {
     color: #008080;
   }
@@ -236,7 +235,7 @@ max-width: 100px;
         </div>
 
         <div class="col-sm-8">
-            <h2 class="page-header text-center"> Finding Aid Edit </h2>
+            <h2 class="page-header text-center"> Upload PDF </h2>
         </div>
 
         <div class="col-sm-2">
@@ -291,6 +290,12 @@ max-width: 100px;
 
           <div class="row grid-buffer">
             <div class="col-sm-12">
+
+              <div class="form_field_container">
+                <label class="form_label"> Ark: &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Ark" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://saa-ts-dacs.github.io/dacs/06_part_I/03_chapter_02/01_reference_code.html" target="_blank">DACS</a></label>
+                {{ form.ark }}
+                <span class="field_caption"></span>
+              </div>
 
               <div class="form_field_container">
                 <label class="form_label"> Identifier (reference code): &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Identifier" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://saa-ts-dacs.github.io/dacs/06_part_I/03_chapter_02/01_reference_code.html" target="_blank">DACS</a></label>
@@ -362,6 +367,18 @@ max-width: 100px;
                   </div>
 
                   <div class="form_field_container">
+                    <label class="form_label">SNAC Reference: &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid SNAC Link" target="_blank">?</a></label>
+                    {{ form.snac }}
+                    <span class="field_caption"></span>
+                  </div>
+
+                  <div class="form_field_container">
+                    <label class="form_label">Wiki Reference: &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Wiki Link" target="_blank">?</a></label>
+                    {{ form.wiki }}
+                    <span class="field_caption"></span>
+                  </div>
+
+                  <div class="form_field_container">
                     <label class="form_label">Digital Link: &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Digital Link" target="_blank">?</a></label>
                     {{ form.digital_link }}
                     <span class="field_caption"></span>
@@ -417,36 +434,31 @@ max-width: 100px;
   
       </div>
 
+      <div class="row grid-buffer">
+  
+        <div class="col-sm-12">
+
+          <details closed>
+            <summary class="message">PDF File</summary>
+
+                <div class="form_field_container">
+                    <label class="form_label">Current file:&nbsp;</label>
+                    {{ associated_file }}
+                    <span class="field_caption"></span>
+                </div>
+
+                  <div class="form_field_container">
+                    <label class="form_label">Upload PDF File</label>
+                    <button class="btn btn-md btn-primary" type="button" onclick="location.href='/FindingAids/ingest_pdf/{{ finding_aid_id }}'">Upload</button>
+                  </div>
+      
+          </details>
+        </div>
+      </div>
+
     </form>
 
     <div class="row grid-buffer">
-
-  <div class="col-md-12" id="manage_content_area">
-
-        <br/>
-        <h4>Revision History</h4>
-        <div class="table-responsive">
-          <table class="table table-striped" id="available_table">
-
-            <tr>
-              <th>Date</th>
-              <th>Editor</th>
-              <th>Revision Notes</th>
-            </tr>
-
-            {% for item in audit %}
-              <tr> 
-                <td>{{ item.update_date }}</td>
-                <td>{{ item.updated_by }}</td>
-                <td>{{ item.revision_notes }}</td>
-              </tr>
-            {% endfor %}
-
-          </table>
-        </div>
-    </div>
-
-  </div>
 
 </div>
 

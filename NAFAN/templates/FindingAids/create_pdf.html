@@ -17,7 +17,6 @@
      <style>
 
 
-
 .page-header {
     color: #008080;
   }
@@ -231,16 +230,12 @@ max-width: 100px;
 
     <div class="row top-buffer">
 
-        <div class="col-sm-3">
-            {% if user_type == "nafan_admin" %}
-            <a href="/Admin/nafan_admin">Back to Dashboard Home</a>
-            {% else %}
-            <a href="/contributor_admin">Back to Dashboard Home</a>
-            {% endif %}
+        <div class="col-sm-2">
+            <a href="/FindingAids/finding_aids/{{ repository_id }}">Finding Aids</a>
         </div>
 
-      <div class="col-sm-7">
-            <h2 class="page-header text-center"> Create Repository</h2>
+        <div class="col-sm-8">
+            <h2 class="page-header text-center"> Create PDF </h2>
         </div>
 
         <div class="col-sm-2">
@@ -249,135 +244,78 @@ max-width: 100px;
       
     </div>
 
-    <div class="row justify-content-center grid-buffer">
-    
-      <form method="POST" enctype="multipart/form-data">
- 
-        <!-- Security token -->
-        {% csrf_token %}
- 
-        <!-- Using the formset -->
-        {% comment %} {{ form.as_p }} {% endcomment %}
-
-        <div class="row">
-
-         <div class="col-md-4">
-
+    <div class="row grid-buffer">
+      <div class="col-sm">
         <div class="form_field_container">
-          <label class="form_label">{{ form.repository_name.label_tag }} </label>
-          {{ form.repository_name }}
-          <span class="field_caption"></span>
+          <label class="form_label">Repository (name and location): &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Repository" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://saa-ts-dacs.github.io/dacs/06_part_I/03_chapter_02/02_name_and_location_of_repository.html" target="_blank">DACS</a></label>
+            {{ form.repository }}
         </div>
+      </div>
+    </div>
 
-        <div class="form_field_container">
-          <label class="form_label">{{ form.parent_organization.label_tag }} </label>
-          {{ form.parent_organization }}
-          <span class="field_caption"></span>
-        </div>
+    <!-- Create a Form -->
+    <form method="POST">
+      {% csrf_token %}
 
-        <div class="form_field_container">
-          <label class="form_label">Street address </label>
-          {{ form.street_address_1 }}
-          <span class="field_caption"></span>
-        </div>
+      <div class="row grid-buffer">
 
-        <div class="form_field_container">
-          <label class="form_label">{{ form.st_city.label_tag }} </label>
-          {{ form.st_city }}
-          <span class="field_caption"></span>
-        </div>
+        <!-- Security token by Django -->
 
-        <div class="form_field_container">
-          <label class="form_label">{{ form.state.label_tag }} </label>
-          {{ form.state }}
-          <span class="field_caption"></span>
-        </div>
+        <div class="col-sm-12">
 
-        <div class="form_field_container">
-          <label class="form_label">Zip code </label>
-          {{ form.st_zip_code_5_numbers }}
-          <span class="field_caption"></span>
-        </div>
-
-        </div>
-        <div class="col-md-4">
-
-        <div class="form_field_container">
-          <label class="form_label">{{ form.url.label_tag }} </label>
-          {{ form.url }}
-          <span class="field_caption"></span>
-        </div>
-
-        <div class="form_field_container">
-          <label class="form_label">{{ form.email.label_tag }} </label>
-          {{ form.email }}
-          <span class="field_caption"></span>
-        </div>
-
-        <div class="form_field_container">
-          <label class="form_label">{{ form.phone.label_tag }} </label>
-          {{ form.phone }}
-          <span class="field_caption"></span>
-        </div>
-        
-        <div class="form_field_container">
-          <label class="form_label">Holdings description </label>
-          {{ form.description }}
-          <span class="field_caption"></span>
-        </div>
-        
-        </div>
-
-        <div class="col-md-4">
-
-        <div class="form_field_container">
-          <label class="form_label">{{ form.repository_type.label_tag }} </label>
-          {{ form.repository_type }}
-          <span class="field_caption"></span>
-        </div>
-
-        <div class="form_field_container">
-          <label class="form_label">{{ form.repository_link.label_tag }} </label>
-          {{ form.repository_link }}
-          <span class="field_caption"></span>
-        </div>
-
-        <div class="form_field_container">
-          <label class="form_label">SNAC Holding Institution ID:</label>
-          {{ form.snac_permalink }}
-          <span class="field_caption"></span>
-        </div>
-
-        <div class="form_field_container">
-          <label class="form_label">Digital Collections URL:</label>
-          {{ form.DPLA }}
-          <span class="field_caption"></span>
-        </div>
-
-        <div class="form_field_container">
-          <label class="form_label">{{ form.latitude.label_tag }} </label>
-          {{ form.latitude }}
-          <span class="field_caption"></span>
-        </div>
-
-        <div class="form_field_container">
-          <label class="form_label">{{ form.longitude.label_tag }} </label>
-          {{ form.longitude }}
-          <span class="field_caption"></span>
-        </div>
+              <div class="form_field_container">
+                <label class="form_label"> Title: &nbsp;&nbsp;&nbsp;&nbsp;<a href="/help/Finding Aid Title" target="_blank">?</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://saa-ts-dacs.github.io/dacs/06_part_I/03_chapter_02/03_title.html" target="_blank">DACS</a></label>
+                {{ form.title }}
+              </div>
 
         </div>
 
+      </div>
+
+      <div class="row grid-buffer">
+
+        <div class="col-sm">
+
+          <div class="form_field_container">
+            <label class="form_label">Revision Notes:</label>
+            {{ form.revision_notes }}
+          </div>
+
+          <input type="submit" value="Submit">
+          <span>&nbsp;&nbsp;</span>
+          <a href='/FindingAids/finding_aids/{{ repository_id }}'>Cancel </a>
+
         </div>
-
-        <br/>
-
-        <input type="submit" value="Submit">
-        <a href="/Repositories/repositories">Cancel </a>
-      </form>
+  
+      </div>
+    </form>
 
 </div>
-</div>
+
+<script>
+
+$('#add_subject_header').click(function () {
+
+  var subject_header = $('#subject_header').val();
+
+  var aid_id = {{finding_aid_id}}
+
+  $.ajax({
+    url: '/ajax/add_subject_header/',
+    data: {'aid_id': aid_id, 'subject_header': subject_header},
+    dataType: 'json',
+    success: function (data) {
+      location.reload();
+    }
+  });
+
+})
+
+</script>
+
+</body>
+
+</html>
 <script>
   $("#NAFAN_header").click(function() {
       location.href = "/contributor_admin";

@@ -16,6 +16,7 @@
 
     <style>
 
+
 .page-header {
   color: #008080;
   margin-left: 10px;
@@ -35,7 +36,7 @@ margin-right: 10px;
 .subheader { 
 margin-top:0; 
 margin-bottom:0;
-margin-left: 30px;
+margin-left: 10px;
 margin-right: 0;
 }
 
@@ -48,18 +49,6 @@ margin-right: 10px;
 #id_username,
 #id_password {
 width: 300px;
-}
-
-ul {
-list-style-type: none;
-margin: 10;
-padding: 10;
-overflow: hidden;
-}
-
-li {
-display: inline-block;
-padding: 10px 30px;
 }
 
 select {
@@ -83,7 +72,7 @@ background-color: #ffff;
 h3.section_title {
 font-family: "Open Sans", Helvetica, Arial, san-serif;
 font-size: 30px;
-color:#5cb85c;
+color:#008080;
 display: inline-block;
 margin: 10px 0 15px 0;
 padding: 0;
@@ -187,6 +176,25 @@ img {
 max-width: 100px;
 }
 
+ul {
+list-style-type: none;
+margin: 10;
+padding: 10;
+overflow: hidden;
+}
+
+li {
+display: inline-block;
+padding: 10px 30px;
+}
+
+.related > li {
+  margin-left: -16px;
+  margin-bottom: -16px;
+  display: block;
+  list-style-type: circle;
+}
+
     </style>
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
@@ -209,7 +217,7 @@ max-width: 100px;
 
         <div class="media" id="NAFAN_header">
             <span class="media-left">
-                <img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/nafanlogo2.jpg" alt="Logo">
+                <img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/nafanlogo1.jpg" alt="Logo">
             </span>
             <div class="media-body">
                 <h2 class="page-header ">NAFAN Demonstration Prototype</h2>
@@ -276,20 +284,27 @@ max-width: 100px;
           <div id="overview">
 
             <ul class="nav">
+              {% if aid.aid_type != "marc" %}
               <li class="nav-item">
-                <a class="nav-link active" id="overview_tab" aria-current="page" href="#">Overview</a>
+                {% comment %} <a class="nav-link active" id="overview_tab" aria-current="page" href="#">Overview</a> {% endcomment %}
+                <button id="overview_tab" type="button">Overview</button>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="details_tab" href="#">Details</a>
+                {% comment %} <a class="nav-link" id="details_tab" href="#">Details</a> {% endcomment %}
+                <button id="details_tab" type="button">Details</button>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{{repository.DPLA}}" target='_blank'>View online items</a>
+                {% comment %} <a class="nav-link" href="{{repository.DPLA}}" target='_blank'>View online items</a> {% endcomment %}
+                <button onclick="window.open('{{aid.digital_link}}')" type="button">View online items</button>
               </li>
+              {% endif %}
               <li class="nav-item">
-                <a class="nav-link" href="/Repository_Info/{{ repository.repository_name }}">Contact Contributing Archive</a>
+                {% comment %} <a class="nav-link" href="/Repository_Info/{{ repository.repository_name }}">Contact Contributing Archive</a> {% endcomment %}
+                <button onclick="location.href='/Repository_Info/{{ repository.repository_name }}'" type="button">Contact Contributing Archive</button>
               </li>
             </ul>
 
+          <br/>
                   <div class="form_field_container">
                     <b>{{ aid.title }}</b><br/>
                     <b>{{ aid.date }}</b>
@@ -379,9 +394,9 @@ max-width: 100px;
 
                   <b>SUBJECTS</b>
 
-                  <ul>
+                  <ul class="related">
                     {% for data in subjects %}
-                      <li><a href="{{ data.link}}">{{ data.term}}</a></li>
+                      <li>{{ data.term}}</a></li>
                     {% endfor %}
                   </ul>
 
@@ -396,17 +411,9 @@ max-width: 100px;
                   <br/>
                   <h4 id="access_use">USING THE COLLECTION</h4>
 
-                  <b>LOCATION</b>
-                  <div class="form_field_container">
-                    Henry W. and Albert A. Berg Collection of English and American Literature<br/>
-                    Stephen A. Schwarzman Building<br/>
-                    Fifth Avenue at 42nd Street, New York, NY 10018-2788<br/>
-                    Third Floor, Room 320
-                  </div>
-
                   <b>ACCESS TO MATERIALS</b>
                   <div class="form_field_container">
-                    <a href="">Request an in-person research appointment.</a>
+                    <span>&nbsp;&nbsp;&nbsp;&nbsp;Request an in-person research appointment.</span>
                   </div>
 
                   <b>CONDITIONS GOVERNING USE</b>
@@ -421,14 +428,16 @@ max-width: 100px;
           <div id="details" style="display:none">
                       <ul class="nav">
               <li class="nav-item">
-                <a class="nav-link active" id="xoverview_tab" aria-current="page" href="#">Overview</a>
+                <button id="xoverview_tab" type="button">Overview</button>
+                {% comment %} <a class="nav-link active" id="xoverview_tab" aria-current="page" href="#">Overview</a> {% endcomment %}
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="xdetails_tab" href="#">Details</a>
+                <button id="xdetails_tab" type="button">Details</button>
+                {% comment %} <a class="nav-link" id="xdetails_tab" href="#">Details</a> {% endcomment %}
               </li>
             </ul>
 
-
+          <br/>
           {% for data in contents %}
             {% if data.component == "c01" %}
                   <div id="{{ data.reference_code}}">
@@ -436,23 +445,23 @@ max-width: 100px;
                     {{ data.intra_repository}}
                     {{ data.container}}
                     {{ data.scope_and_content | safe }}
-                    {{ data.extent}}
+                    <b>{{ data.extent}}</b>
                     {{ data.note}}
                   </div>
             {% else %}
-                  {{ data.indent | safe }}<i>{{ data.title }}</i><br/>
-                  {{ data.indent | safe }}{{ data.container}}<br/>
+                  <i>{{ data.title }}</i>
+                  {{ data.indent | safe }}{{ data.container}}
                   {% if data.digital_link %}
-                    {{ data.indent | safe }}<a target='blank' href={{ data.digital_link }}>View Digital Object</a><br/>
+                    {{ data.indent | safe }}<a target='blank' href={{ data.digital_link }}>View Digital Object</a>
                   {% endif %}
                   {% if data.date %}
-                    {{ data.indent | safe }}{{ data.date }}<br/>
+                    {{ data.indent | safe }}{{ data.date }}
                   {% endif %}
                   {% if data.extent %}
-                    {{ data.indent | safe }}{{ data.extent}}<br/>
+                    {{ data.indent | safe }}{{ data.extent}}
                   {% endif %}
                   {% if data.scope_and_content %}
-                    {{ data.indent | safe }}{{ data.scope_and_content | safe }}<br/>
+                    {{ data.scope_and_content | safe }}
                   {% endif %}
             {% endif %}
                 <br/>

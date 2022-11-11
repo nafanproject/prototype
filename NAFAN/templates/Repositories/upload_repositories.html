@@ -23,140 +23,187 @@
 
 
 .page-header {
-    color: #5cb85c;
+    color: #008080;
   }
 
+.page-header {
+  color: #008080;
+  margin-left: 10px;
+}
+
 .message {
-  color: cadetblue;
+color: cadetblue;
 }
 
 .top-buffer { 
-  margin-top:20px; 
-  margin-bottom:10px;
-  margin-left: 10px;
-  margin-right: 10px;
+margin-top:20px; 
+margin-bottom:10px;
+margin-left: 10px;
+margin-right: 10px;
+}
+
+.subheader { 
+margin-top:0; 
+margin-bottom:0;
+margin-left: 10px;
+margin-right: 0;
+}
+
+.aid_data {
+margin-top:0; 
+margin-bottom:10px;
+margin-left: 0px;
+margin-right: 0;
 }
 
 .grid-buffer { 
-  margin-bottom:10px;
-  margin-left: 10px;
-  margin-right: 10px;
+margin-bottom:10px;
+margin-left: 10px;
+margin-right: 10px;
 }
 
 #id_username,
 #id_password {
-  width: 300px;
+width: 300px;
 }
 
 ul {
-  list-style-type: none;
+list-style-type: none;
+margin: 10;
+padding: 10;
+overflow: hidden;
+}
+
+li {
+display: inline-block;
+padding: 10px 30px;
 }
 
 select {
-  border:1px solid #ccc;
-  vertical-align:top;
-  height:30px;
+border:1px solid #ccc;
+vertical-align:top;
+height:30px;
 }
 
 .manage_page_container {
-  margin: 0 0 20px 0;
-  padding: 0;
-  display: block;
-  overflow: hidden;
+margin: 0 0 20px 0;
+padding: 0;
+display: block;
+overflow: hidden;
 }
 
 .background_content {
-  background-color: #ffff;
-  /* border: 1px solid #ced4da; */
+background-color: #ffff;
+/* border: 1px solid #ced4da; */
 }
 
 h3.section_title {
-  font-family: "Open Sans", Helvetica, Arial, san-serif;
-  font-size: 30px;
-  color:#5cb85c;
-  display: inline-block;
-  margin: 10px 0 15px 0;
-  padding: 0;
+font-family: "Open Sans", Helvetica, Arial, san-serif;
+font-size: 30px;
+color:#008080;
+display: inline-block;
+margin: 10px 0 15px 0;
+padding: 0;
+}
+
+.links_text {
+font-family: "Open Sans", Helvetica, Arial, san-serif;
+font-size: 12px;
 }
 
 svg.icon_spacer {
-  display: inline-block;
-  margin-right: 5px;
+display: inline-block;
+margin-right: 5px;
 }
 
 .form_field_container {
-  margin: 0 0 10px 0;
-  display:block;
-  overflow:hidden;
+margin: 0 0 10px 0;
+display:block;
+overflow:hidden;
 }
 
 label.form_label {
-  width: auto;
-  font-weight: 600;
-  margin: 5px 10px 0 0;
-  display: block;
-  overflow: hidden;
+width: auto;
+font-weight: 600;
+margin: 5px 10px 0 0;
+display: block;
+overflow: hidden;
 }
 
 input.medium_field,
 select.medium_field {
-  width: 200px !important;
+width: 200px !important;
 }
 
 input.large_field,
 select.large_field {
-  width: 300px !important;
+width: 300px !important;
 }
 
 input.ex_large_field,
 select.ex_large_field {
-  width: 500px !important;
+width: 500px !important;
 }
 
 input.manage_search {
-  float: left;
-  width: 300px;
-  margin: 0 10px, 0 0;
+float: left;
+width: 300px;
+margin: 0 10px, 0 0;
 }
 
 select.manage_search {
-  float: left;
-  margin: 0 20px, 0 0;
+float: left;
+margin: 0 20px, 0 0;
 }
 
 button.manage_search {
-  float: left;
-  background-color: #2371c3;
-  border-color: #2371c3;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  margin: 0;
-  margin-left: 5px;
-  cursor: pointer;
+float: left;
+background-color: #2371c3;
+border-color: #2371c3;
+border-top-left-radius: 0;
+border-bottom-left-radius: 0;
+margin: 0;
+margin-left: 5px;
+cursor: pointer;
 }
 
 input.search_field {
-  height: 30px;
-  border-right: none;
+height: 30px;
+border-right: none;
 }
 
 .button_container {
-  display: inline-block;
-  overflow: hidden;
-  margin: 0 0 0, 20px;
-  padding: 0;
+display: inline-block;
+overflow: hidden;
+margin: 0 0 0, 20px;
+padding: 0;
 }
 
 button.manage_button {
-  float: left;
-  margin-right: 10px;
-  display: block;
-  overflow: hidden;
+float: left;
+margin-right: 10px;
+display: block;
+overflow: hidden;
 }
 
 .field_caption {
-  color: cadetblue;
+color: cadetblue;
 }
+
+.parent {
+display: table;
+}
+.parent > ul {
+display: table-row;
+}
+.parent > ul > li {
+display: table-cell;
+padding: 0 30px 0 30px;
+}
+img {
+max-width: 100px;
+}
+
     </style>
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
@@ -169,6 +216,22 @@ button.manage_button {
 <body>
 
 <div class="container-fluid">
+
+    <div class="row top-buffer">
+
+        <div class="col-lg-12">
+          <div class="media" id="NAFAN_header">
+              <span class="media-left">
+                  <img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/nafanlogo1.jpg" alt="Logo">
+              </span>
+              <div class="media-body">
+                  <h2 class="page-header">NAFAN Demonstration Prototype</h2>
+                  <h5><span class="subheader">Contributor Dashboard</span></h5>
+              </div>
+          </div>
+        </div>
+
+    </div>
 
   <div class="row top-buffer">
 
@@ -201,3 +264,8 @@ button.manage_button {
 
 </body>
 </html>
+<script>
+  $("#NAFAN_header").click(function() {
+      location.href = "/contributor_admin";
+  });
+</script>

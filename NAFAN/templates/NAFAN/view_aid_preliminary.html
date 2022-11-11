@@ -35,7 +35,7 @@ margin-right: 10px;
 .subheader { 
 margin-top:0; 
 margin-bottom:0;
-margin-left: 30px;
+margin-left: 10px;
 margin-right: 0;
 }
 
@@ -55,18 +55,6 @@ margin-right: 10px;
 #id_username,
 #id_password {
 width: 300px;
-}
-
-ul {
-list-style-type: none;
-margin: 10;
-padding: 10;
-overflow: hidden;
-}
-
-li {
-display: inline-block;
-padding: 10px 30px;
 }
 
 select {
@@ -90,7 +78,7 @@ background-color: #ffff;
 h3.section_title {
 font-family: "Open Sans", Helvetica, Arial, san-serif;
 font-size: 30px;
-color:#5cb85c;
+color:#008080;
 display: inline-block;
 margin: 10px 0 15px 0;
 padding: 0;
@@ -180,20 +168,39 @@ overflow: hidden;
 color: cadetblue;
 }
 
+ul {
+list-style-type: none;
+margin: 10;
+padding: 10;
+overflow: hidden;
+}
+
+li {
+display: inline-block;
+padding: 10px 30px;
+}
+
 .parent {
-display: table;
+  display: table;
 }
 .parent > ul {
-display: table-row;
+  display: table-row;
 }
 .parent > ul > li {
-display: table-cell;
-padding: 0 30px 0 30px;
+  display: table-cell;
+  padding: 0 30px 0 30px;
 }
+
+.related > li {
+  margin-left: -16px;
+  margin-bottom: -16px;
+  display: block;
+  list-style-type: circle;
+}
+
 img {
 max-width: 100px;
 }
-
     </style>
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js">  </script>    
@@ -216,7 +223,7 @@ max-width: 100px;
 
         <div class="media" id="NAFAN_header">
             <span class="media-left">
-                <img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/nafanlogo2.jpg" alt="Logo">
+                <img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/nafanlogo1.jpg" alt="Logo">
             </span>
             <div class="media-body">
                 <h2 class="page-header ">NAFAN Demonstration Prototype</h2>
@@ -239,7 +246,7 @@ max-width: 100px;
         <!-- Security token by Django -->
         {% csrf_token %}
  
-        <div class="col-sm-8" >
+        <div class="col-sm-7" >
 
           <div id="overview">
 
@@ -249,14 +256,16 @@ max-width: 100px;
                   </div>
 
                   <div class="row" id="descriptive_identity">
-                      <div class="col-lg-12 aid_data">Persistent identifier:&nbsp;ark:/{{ aid.pk }}</div>
-                      <div class="col-lg-12 aid_data">Location:&nbsp;<a href='/Repository_Info/{{ repo.repository_name }}'>{{ aid.repository }}</a></div>
-                      <div class="col-lg-12 aid_data">Date Contributed:&nbsp;{{ aid.last_update }}</div>
-                      <div class="col-lg-12 aid_data">Extent:&nbsp;{{ aid.extent }}</div>
-                      <div class="col-lg-12 aid_data">Scope and content:&nbsp;{{ aid.scope_and_content}}</div>
-                      <div class="col-lg-12 aid_data">Access:&nbsp;{{ aid.governing_access }}</div>
-                      <div class="col-lg-12 aid_data">Languages:&nbsp;{{ aid.languages }}</div>
-                      <div class="col-lg-12 aid_data">Rights:&nbsp;{{ aid.rights  | safe }}</div>
+                      <div class="col-lg-12 aid_data"><b>Persistent identifier:</b>&nbsp;{{ aid.ark}}</div> 
+                      <div class="col-lg-12 aid_data"><b>Collection number:</b>&nbsp;{{ aid.reference_code}}</div>
+                      <div class="col-lg-12 aid_data"><b>Location:</b>&nbsp;<a href='/Repository_Info/{{ repo.repository_name }}'>{{ aid.repository }}</a></div>
+                      <div class="col-lg-12 aid_data"><b>Dates:</b>&nbsp;{{ aid.date}}</div>
+                      <div class="col-lg-12 aid_data"><b>Extent:</b>&nbsp;{{ aid.extent }}</div>
+                      <div class="col-lg-12 aid_data"><b>Scope and content:</b>&nbsp;{{ aid.scope_and_content}}</div>
+                      <div class="col-lg-12 aid_data"><b>Access:</b>&nbsp;{{ aid.governing_access }}</div>
+                      <div class="col-lg-12 aid_data"><b>Languages:</b>&nbsp;{{ aid.languages }}</div>
+                      <div class="col-lg-12 aid_data"><b>Collection guide made available under the following license:</b>&nbsp;{{ aid.rights  | safe }}</div>
+                      <div class="col-lg-12 aid_data"><b>Collection guide last contribution date:</b>&nbsp;{{ aid.last_update }}</div>
                  </div>
 
           </div>
@@ -267,57 +276,46 @@ max-width: 100px;
           &nbsp;
         </div>
 
-        <div class="col-sm-3">
+        <div class="col-sm-4">
 
           <div id="sidebar">
 
             {% if aid.repository_link %}
-                  <a href="{{ aid.repository_link }}" target="_blank">Visit Finding Aid on Institute Site</a>
+              <img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/external-link-line.jpeg" alt="Logo" height="50" width="50">
+              <button onclick="window.open('{{aid.repository_link}}')" class="btn btn-warning" type="button">Visit Finding Aid on Institute Site</button>
             {% else %}
               {% if aid.aid_type == "pdf" %}
-                    <a href="https://raw.githubusercontent.com/nafanproject/prototype/master/media/glbths_1999-79_FinocchiosFindingAid.docx.pdf" download>Download Finding Aid PDF</a>
+                  {% comment %} <button onclick="location.href='https://raw.githubusercontent.com/nafanproject/prototype/master/media/glbths_1999-79_FinocchiosFindingAid.docx.pdf'" class="btn btn-warning" type="button">Download Finding Aid PDF</button> {% endcomment %}
+                  <img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_pdf.jpg" alt="Logo" height="50" width="50">
+                  <button onclick="location.href='{{ aid.associated_file }}'" class="btn btn-warning" type="button">Download Finding Aid PDF</button>
               {% else %}
-                    <a href="/view_aid_public/{{ aid.pk }}">Full Finding Aid</a>
+                    <button onclick="location.href='/view_aid_public/{{ aid.pk }}'" class="btn btn-warning" type="button">Link to Full Finding Aid</button>
               {% endif %}
             {% endif %}
 
                   <div class="form_field_container">
                     <h4>&nbsp;</h4>
                     <p><b>Related Topics</b></p>
-                    <ul>
-                      <li>Visual Arts</li>
-                      <li>San Francisco, Bay Area</li>
-                      <li>Chicago</li>
+
+                    <ul class="related">
+                    {% for data in subjects %}
+                        <li>{{ data.term}}</a></li>
+                    {% endfor %}
                     </ul>
                   </div>
 
                   <div class="form_field_container">
-                    <h4>&nbsp;</h4>
-                    <p><b>Related Collections</b></p>
-                    <ul>
-                      <li>Visual Arts</li>
-                      <li>San Francisco, Bay Area</li>
-                      <li>Chicago</li>
+                    <p><b>Descriptions of Related Persons, Families, and Organizations</b></p>
+                    <ul class="related">
+                      <li class="related-mats"><a href="{{aid.snac}}" target="_blank">Social Networks and Archival Context</a></li>
+                      <li class="related-mats"><a href="{{aid.wiki}}" target="_blank">Wikidata</a></li>
                     </ul>
                   </div>
-
-                  <div class="form_field_container">
-                    <h4>&nbsp;</h4>
-                    <p><b>Related SNAC Identities</b></p>
-                    <ul>
-                      <li>Visual Arts</li>
-                      <li>San Francisco, Bay Area</li>
-                      <li>Chicago</li>
-                    </ul>
-                  </div>
-
           </div>
       </div>
 
       </div>
 
-      
-      
       <div class="row grid-buffer">
           <div class="col-sm">
             <a href='/Browse_Repository/{{ aid.id }}'>Done </a>
