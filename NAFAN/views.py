@@ -15,10 +15,11 @@ from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRe
 
 from .models import NAFANLoginForm, NAFANLog, NAFANAudit, NAFANUser, NAFANUserForm, NAFANJoinUsForm
 from .models import Repository, RepositoryForm, User_Repositories, UploadFileForm, save_uploaded_file
-from .models import FindingAid, FindingAidSubjectHeader, DacsAidForm, EADAidForm, MARCAidForm, PDFAidForm, NAFANJoinUs
+from .models import FindingAid, FindingAidSubjectHeader, DacsAidForm, EADAidForm, MARCAidForm, PDFAidForm, NAFANJoinUs, AidSupplementForm
 from .models import Chronology, ControlAccess, AidProfile, AidProfileForm, HarvestProfile, HarvestProfileForm, FindingAidAudit
 
 import lxml.etree as ET
+import os
 
 # Public
 
@@ -199,6 +200,33 @@ def Browse_Repository_Entries(request, id):
 
     return render(request, 'NAFAN/Browse_Repository.html', context)
 
+def view_aid_preliminary(request, id):
+        
+    # dictionary for initial data with
+    # field names as keys
+    context ={}
+ 
+    # fetch the object related to passed id
+    aid = get_object_or_404(FindingAid, id = id)
+ 
+    repo = Repository.GetRepositoryByName(aid.repository)
+    # case statement for display of aid based on type
+ 
+    # add form dictionary to context
+    context["aid"] = aid
+    context["repo"] = repo
+
+    # contents = []
+    # contents = FindingAid.GetFindingAidContents(id, contents)
+    context["contents"] = FindingAid.objects.filter(progenitorID=id).order_by('pk')
+    context["chron"] = Chronology.objects.filter(finding_aid_id=id).order_by('sort_order')
+    context["series"] = FindingAid.objects.filter(progenitorID=id,level="c01").order_by('pk')
+    context["names"] = ControlAccess.objects.filter(finding_aid_id=id,control_type="persname").order_by('term')
+    context["subjects"] = ControlAccess.objects.filter(finding_aid_id=id,control_type="subject").order_by('term')
+    context["materials"] = ControlAccess.objects.filter(finding_aid_id=id,control_type="genreform").order_by('term')
+
+    return render(request, "NAFAN/view_aid_preliminary.html", context)
+
 def view_aid_public(request, id):
         
     # dictionary for initial data with
@@ -213,6 +241,7 @@ def view_aid_public(request, id):
  
     # add form dictionary to context
     context["aid"] = aid
+    context["repository"] = repo
 
     # contents = []
     # contents = FindingAid.GetFindingAidContents(id, contents)
@@ -268,7 +297,11 @@ def users(request):
     # add the dictionary during initialization
     # context["dataset"] = NAFANUser.objects.all().order_by("email")
     context["dataset"] = user_list
-         
+
+    email = request.session['current_login']
+    user = NAFANUser.GetUser(email)
+    context["user_type"] = user.user_type
+
     return render(request, "Users/users.html", context)
 
 def create_user(request):
@@ -290,6 +323,10 @@ def create_user(request):
          
     context['form']= form
 
+    email = request.session['current_login']
+    user = NAFANUser.GetUser(email)
+    context["user_type"] = user.user_type
+
     return render(request, "Users/create_user.html", context)
 
 def delete_user(request, id):
@@ -308,6 +345,11 @@ def delete_user(request, id):
         return HttpResponseRedirect("/Users/users")
  
     context["user_name"] = obj.full_name
+
+    email = request.session['current_login']
+    user = NAFANUser.GetUser(email)
+    context["user_type"] = user.user_type
+
     return render(request, "Users/delete_user.html", context)
 
 def update_user(request, id):
@@ -332,6 +374,10 @@ def update_user(request, id):
     context["form"] = form
     context["audit"] = NAFANAudit.GetAudit(id, NAFANAudit.USER_TARGET)
  
+    email = request.session['current_login']
+    user = NAFANUser.GetUser(email)
+    context["user_type"] = user.user_type
+
     return render(request, "Users/update_user.html", context)
 
 
@@ -403,6 +449,10 @@ def create_repository(request):
         return HttpResponseRedirect("/Repositories/repositories")
          
     context['form']= form
+
+    email = request.session['current_login']
+    user = NAFANUser.GetUser(email)
+    context["user_type"] = user.user_type
 
     return render(request, "Repositories/create_repository.html", context)
 
@@ -487,7 +537,8 @@ def export_repositories(request):
 
     Repository.ExportRepositories()
     
-    return JsonResponse({'SearchField': request.session['repository_search_field'], 'SearchTerm': request.session['repository_search_term'], 'Status': request.session['repository_search_status']})
+    #return JsonResponse({'SearchField': request.session['repository_search_field'], 'SearchTerm': request.session['repository_search_term'], 'Status': request.session['repository_search_status']})
+    return HttpResponse(os.path.dirname(os.path.abspath(__file__)))
 
 
 # User Repositories
@@ -510,7 +561,6 @@ def user_repositories(request, id):
             repositories = User_Repositories.GetRepositories(email)
 
     user = get_object_or_404(NAFANUser, id = id)
-    # if user.user_type != "nafan_admin":
     user_repositories = User_Repositories.GetRepositories(user.email)
 
     return render(request,'Users/user_repositories.html',
@@ -587,6 +637,10 @@ def aid_profile(request):
     context['form']= form
     context['repository_id']= request.session['active_repository']
 
+    email = request.session['current_login']
+    user = NAFANUser.GetUser(email)
+    context["user_type"] = user.user_type
+
     return render(request, "FindingAids/aid_profile.html", context)
 
 def new_aid(request):
@@ -610,9 +664,11 @@ def new_aid(request):
     if id == MARC:
         return redirect("ingest_marc")
     if id == PDF:
-        return redirect("ingest_pdf")
+        return redirect("create_pdf")
     if id == SCHEMA:
         return redirect("ingest_schema")
+
+    return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
 
 def delete_aid(request, id):
  
@@ -636,14 +692,18 @@ def create_dacs(request):
     context ={}
  
     repository = Repository.GetRepositoryByID(request.session['active_repository'])
-    aid_format = AidProfile.GetAidProfileByID(repository.pk)
-    initial_dict = {
-        "name_and_location" : repository.repository_name,
-        "governing_access" : aid_format.governing_access,
-        "rights" : aid_format.rights,
-        "creative_commons" : aid_format.creative_commons,
-        "repository" : repository.repository_name,
-        }
+    initial_dict = {}
+
+    if AidProfile.Exists(repository.pk):
+        aid_format = AidProfile.GetAidProfileByID(repository.pk)
+        initial_dict = {
+            "name_and_location" : repository.repository_name,
+            "governing_access" : aid_format.governing_access,
+            "rights" : aid_format.rights,
+            "creative_commons" : aid_format.creative_commons,
+            "repository" : repository.repository_name,
+            }
+
     context['repository_name']= repository.repository_name
 
     # add the dictionary during initialization
@@ -686,6 +746,66 @@ def create_dacs(request):
 
     return render(request, "FindingAids/create_dacs.html", context)
 
+def create_pdf(request):
+
+    # Display a page for the creation of a manual DACS-based finding aid
+    context ={}
+ 
+    repository = Repository.GetRepositoryByID(request.session['active_repository'])
+    initial_dict = {}
+
+    if AidProfile.Exists(repository.pk):
+        aid_format = AidProfile.GetAidProfileByID(repository.pk)
+        initial_dict = {
+            "name_and_location" : repository.repository_name,
+            "governing_access" : aid_format.governing_access,
+            "rights" : aid_format.rights,
+            "creative_commons" : aid_format.creative_commons,
+            "repository" : repository.repository_name,
+            }
+
+    context['repository_name']= repository.repository_name
+
+    # add the dictionary during initialization
+    form = DacsAidForm(request.POST or None, initial = initial_dict)
+    if form.is_valid():
+        aid = form.save(commit=False)
+        aid.aid_type = "pdf"
+        aid.repository = context['repository_name']
+        
+        # Save the notes for the audit, but clear them in the database so they show blank on the next edit
+        notes = aid.revision_notes
+        aid.revision_notes = ""
+
+        # Assign the date and user of the last update
+        user = NAFANUser.GetUser(request.session['current_login'])
+        aid.updated_by = user.full_name
+
+        today = date.today()
+        aid.last_update = today.strftime("%B %d, %Y")
+
+        aid.save()
+       
+        # Since this is the create, add a new entry for a finding aid into the search engine
+        elasticsearch_id = FindingAid.CreateIndex(aid.pk, "pdf", aid.title, aid.repository, aid.scope_and_content, "")
+
+        # Save the search engine index into the finding aid entry in the relational database
+        if elasticsearch_id != "Fail":
+            FindingAid.objects.filter(pk=form.instance.id).update(elasticsearch_id=elasticsearch_id)
+
+        aid.elasticsearch_id = elasticsearch_id
+        aid.save()
+
+        # Add the audit
+        FindingAidAudit.AddAudit(form.instance.id, notes, user.full_name, today)
+
+        return HttpResponseRedirect("/FindingAids/edit_pdf/" + str(aid.pk))
+         
+    context['form']= form
+    context['repository_id']= request.session['active_repository']
+
+    return render(request, "FindingAids/create_pdf.html", context)
+
 def ingest_ead(request):
 
     repository = Repository.GetRepositoryByID(request.session['active_repository'])
@@ -719,7 +839,9 @@ def ingest_marc(request):
         if form.is_valid():
             fileName = save_uploaded_file(request.FILES['file'])
 
-            FindingAid.MARCIndex("new", repository.repository_name, fileName)
+            user = NAFANUser.GetUser(request.session['current_login'])
+
+            FindingAid.MARCIndex("new", repository.repository_name, fileName, user.full_name)
             
             return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
 
@@ -727,26 +849,29 @@ def ingest_marc(request):
 
     return render(request, 'FindingAids/ingest_marc.html', {'form': form, "repository_name":repository.repository_name, "repository_id": request.session['active_repository']})
 
-def ingest_pdf(request):
+def ingest_pdf(request, id):
  
-    repository = Repository.GetRepositoryByID(request.session['active_repository'])
+    context = {}
 
     if request.method == 'POST':
+        # Uploaded location
+        save_uploaded_file(request.FILES['file'])
 
-        form = PDFAidForm(request.POST, request.FILES)
-        if form.is_valid():
+        # url relative location
+        file = request.FILES['file']
+        fileName = "/media/" + file.name
 
-            title = form.cleaned_data['title']
-            description = form.cleaned_data['description']
-            fileName = save_uploaded_file(request.FILES['file'])
+        aid = get_object_or_404(FindingAid, id = id)
+        aid.associated_file = fileName
+        aid.save()
 
-            FindingAid.PDFIndex("new", title, description, repository.repository_name, fileName)
-            
-            return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
+        return HttpResponseRedirect("/FindingAids/edit_pdf/" + str(id))
+    else:
+        form = UploadFileForm()
 
-    form = PDFAidForm()
+    context['form']= form
 
-    return render(request, 'FindingAids/ingest_pdf.html', {'form': form, "repository_name":repository.repository_name, "repository_id": request.session['active_repository']})
+    return render(request, "FindingAids/ingest_pdf.html", context)
 
 def ingest_schema(request):
 
@@ -785,6 +910,9 @@ def update_aid(request, id):
 
     if aid.aid_type == "marc":
         return HttpResponseRedirect("/FindingAids/edit_marc/" + str(id))
+
+    if aid.aid_type == "pdf":
+        return HttpResponseRedirect("/FindingAids/edit_pdf/" + str(id))
 
 def edit_dacs(request, id):
 
@@ -843,28 +971,19 @@ def edit_ead(request, id):
     aid = get_object_or_404(FindingAid, id = id)
  
     # pass the object as instance in form
-    form = EADAidForm(request.POST or None, instance = aid)
+    form = AidSupplementForm(request.POST or None, instance = aid)
  
-    # save the data from the form and
-    # redirect to detail_view
+    # update the aid
     if form.is_valid():
 
-        fileName = save_uploaded_file(request.FILES['file'])
-
-        FindingAid.EADIndex(aid.id, aid.repository, fileName)
+        aid.ark = form.cleaned_data['ark']
+        aid.repository_link = form.cleaned_data['repository_link']
+        aid.snac = form.cleaned_data['snac']
+        aid.wiki = form.cleaned_data['wiki']
+        aid.save()
 
         return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
  
-    # add form dictionary to context
-    # context["form"] = form
-    # context["repository_id"] = request.session['active_repository']
-    # context["repository_name"] = aid.repository
-    # context["repository_name"] = aid.repository
-
-    # return render(request, "FindingAids/edit_ead.html", context)
-
-    form = UploadFileForm()
-
     return render(request, 'FindingAids/edit_ead.html', {'form': form, "aid": aid, "repository_id": request.session['active_repository']})
 
 def edit_marc(request, id):
@@ -877,59 +996,70 @@ def edit_marc(request, id):
     aid = get_object_or_404(FindingAid, id = id)
  
     # pass the object as instance in form
-    form = MARCAidForm(request.POST or None, instance = aid)
+    form = AidSupplementForm(request.POST or None, instance = aid)
  
     # save the data from the form and
     # redirect to detail_view
     if form.is_valid():
 
-        fileName = save_uploaded_file(request.FILES['file'])
-
-        FindingAid.MARCIndex(aid.id, aid.repository, fileName)
+        aid.ark = form.cleaned_data['ark']
+        aid.repository_link = form.cleaned_data['repository_link']
+        aid.snac = form.cleaned_data['snac']
+        aid.wiki = form.cleaned_data['wiki']
+        aid.save()
 
         return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
  
-    # add form dictionary to context
-    context["form"] = form
-    context["repository_id"] = request.session['active_repository']
-    context["repository_name"] = aid.repository
-
-    # return render(request, "FindingAids/edit_ead.html", context)
-
-    form = UploadFileForm()
-
-    return render(request, 'FindingAids/edit_ead.html', {'form': form, "aid": aid, "repository_id": request.session['active_repository']})
+    return render(request, 'FindingAids/edit_marc.html', {'form': form, "aid": aid, "repository_id": request.session['active_repository']})
 
 def edit_pdf(request, id):
 
-    # dictionary for initial data with
-    # field names as keys
+    # Display a page for the creation of a manual DACS-based finding aid
     context ={}
  
-    # fetch the object related to passed id
-    aid = get_object_or_404(FindingAid, id = id)
- 
-    # pass the object as instance in form
-    form = PDFAidForm(request.POST or None, instance = aid)
- 
-    # save the data from the form and
-    # redirect to detail_view
+    repository = Repository.GetRepositoryByID(request.session['active_repository'])
+    context['repository_name']= repository.repository_name
+
+    obj = get_object_or_404(FindingAid, id = id)
+    elasticsearch_id = obj.elasticsearch_id
+    associated_file = obj.associated_file
+
+    form = DacsAidForm(request.POST or None, instance = obj)
+
+    # add the dictionary during initialization
     if form.is_valid():
+        aid = form.save(commit=False)
+        aid.aid_type = "pdf"
+        aid.repository = context['repository_name']
+        aid.elasticsearch_id = elasticsearch_id
+        aid.associated_file = associated_file
 
-        fileName = save_uploaded_file(request.FILES['file'])
+        # Save the notes for the audit, but clear them in the database so they show blank on the next edit
+        notes = aid.revision_notes
+        aid.revision_notes = ""
 
-        FindingAid.PDFIndex(aid.id, aid.repository, fileName)
+        # Assign the date and user of the last update
+        user = NAFANUser.GetUser(request.session['current_login'])
+        aid.updated_by = user.full_name
 
-        return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
- 
-    # add form dictionary to context
-    context["form"] = form
-    context["repository_id"] = request.session['active_repository']
-    context["repository_name"] = aid.repository
+        today = date.today()
+        aid.last_update = today.strftime("%B %d, %Y")
 
-    form = UploadFileForm()
+        aid.save()
+       
+        FindingAid.UpdateIndex(aid.pk, aid.elasticsearch_id, "pdf", aid.title, aid.repository, aid.scope_and_content, "")
 
-    return render(request, 'FindingAids/edit_pdf.html', {'form': form, "aid": aid, "repository_id": request.session['active_repository']})
+        # Add the audit
+        FindingAidAudit.AddAudit(form.instance.id, notes, user.full_name, today)
+
+        return HttpResponseRedirect("/FindingAids/finding_aids/" + str(repository.pk))
+         
+    context['form']= form
+    context['finding_aid_id']= id
+    context['repository_id']= request.session['active_repository']
+    context['associated_file']= associated_file
+
+    return render(request, "FindingAids/edit_pdf.html", context)
 
 def view_aid(request, id):
 
@@ -995,10 +1125,13 @@ def harvest_aids(request):
     user = NAFANUser.GetUser(request.session['current_login'])
 
     if harvest_profile.harvest_type == "File":
-        FindingAid.HarvestEADFile(harvest_profile.harvest_location, repository.repository_name, user.full_name)
+        if harvest_profile.default_format == "PDF":
+            FindingAid.HarvestPDFFile(harvest_profile.harvest_location, repository.repository_name, user.full_name)
+        else:
+            FindingAid.HarvestEADFile(harvest_profile.harvest_location, repository.repository_name, user.full_name)
 
     if harvest_profile.harvest_type == "Directory":
-        FindingAid.HarvestEAD(harvest_profile.harvest_location, repository.repository_name)
+        FindingAid.HarvestEAD(harvest_profile.harvest_location, repository.repository_name, user.full_name)
 
     if harvest_profile.harvest_type == "OAI":
         FindingAid.HarvestOAI(harvest_profile.harvest_location, repository.repository_name)
@@ -1013,6 +1146,10 @@ def harvest_profiles(request):
  
     context['profiles']= HarvestProfile.GetHarvestProfiles(request.session['active_repository'])
     context['repository_id'] = request.session['active_repository']
+
+    email = request.session['current_login']
+    user = NAFANUser.GetUser(email)
+    context["user_type"] = user.user_type
 
     return render(request, "FindingAids/harvest_profiles.html", context)
 

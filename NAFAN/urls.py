@@ -6,6 +6,7 @@ from django.conf.urls import url
 
 urlpatterns = [
     path("", views.home, name="home"),
+    path("index", views.home, name="home"),
     path("nafanlogin/", views.NAFANLogin, name="NAFANLogin"),
     path("forgot_password/", views.forgot_password, name="forgot_password"),
     path("help/<str:topic>", views.help, name="help"),    
@@ -15,6 +16,7 @@ urlpatterns = [
     path('Repository_Info/<str:repository_name>', views.Repository_Info, name="Repository_Info" ),
     path('Browse_Repository/<int:id>', views.Browse_Repository, name="Browse_Repository" ),
     path('Browse_Repository_Entries/<int:id>', views.Browse_Repository_Entries, name="Browse_Repository_Entries" ),
+    path('view_aid_preliminary/<int:id>', views.view_aid_preliminary, name="view_aid_preliminary" ),
     path('view_aid_public/<int:id>', views.view_aid_public, name="view_aid_public" ),
     path('accounts/', include('django.contrib.auth.urls')),
     path("contributor/", views.contributor, name="contributor"),
@@ -50,10 +52,12 @@ urlpatterns = [
     path('FindingAids/update_aid/<int:id>', views.update_aid, name="update_aid" ),
     path('FindingAids/delete_aid/<int:id>', views.delete_aid, name="delete_aid" ),
     path("FindingAids/create_dacs", views.create_dacs, name="create_dacs"),    
+    path("FindingAids/create_pdf", views.create_pdf, name="create_pdf"),    
     path("FindingAids/edit_dacs/<int:id>", views.edit_dacs, name="edit_dacs"),    
     path('FindingAids/ingest_ead', views.ingest_ead, name="ingest_ead" ),
     path("FindingAids/edit_ead/<int:id>", views.edit_ead, name="edit_ead"),    
-    path('FindingAids/ingest_pdf', views.ingest_pdf, name="ingest_pdf" ),
+    path("FindingAids/edit_pdf/<int:id>", views.edit_pdf, name="edit_pdf"),    
+    path('FindingAids/ingest_pdf/<int:id>', views.ingest_pdf, name="ingest_pdf" ),
     path('FindingAids/ingest_marc', views.ingest_marc, name="ingest_marc" ),
     path("FindingAids/edit_marc/<int:id>", views.edit_marc, name="edit_marc"),    
     path('FindingAids/ingest_schema', views.ingest_schema, name="ingest_schema" ),
@@ -70,3 +74,6 @@ urlpatterns = [
     path('ajax/add_subject_header/', views.add_subject_header, name='add_subject_header'),
 
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
