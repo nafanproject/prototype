@@ -12,7 +12,7 @@ from django.db import models
 from django.forms import ModelForm
 
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Search
+from elasticsearch_dsl import Search, Q
 from bs4 import BeautifulSoup
 from pymarc import MARCReader
 from PyPDF2 import PdfFileReader
@@ -21,7 +21,7 @@ from sickle import Sickle
 # The field sizes in the table definitions are all over the place as this was just to get the prototype
 # working with provided samples and there were no discussions of realistic values
 
-FILE_TYPES = [('EAD', 'EAD'), ('MARC', 'MARC'), ('PDF', 'PDF'), ('Schema', 'HTML with Schema.org')]
+FILE_TYPES = [('EAD', 'EAD'), ('MARC', 'MARC (under development)'), ('PDF', 'PDF (under development)')]
 HARVEST_TYPES = [('File', 'File'),('Directory', 'Directory'), ('Sitemap', 'Sitemap'), ('OAI', 'OAI-PMH')]
 DAYS = [('1', '1'), ('2', '2'), ('3', '3'), ('4', '...')]
 HOURS = [('12AM', '12AM'), ('12:30AM', '12:30AM'), ('1AM', '1AM'), ('4', '...')]
@@ -139,6 +139,11 @@ class FindingAid(models.Model):
     bioghist = models.TextField(blank=True)
     originals_location = models.TextField(blank=True)
     
+    ark = models.CharField(max_length=1255, blank=True)
+    snac = models.CharField(max_length=1255, blank=True)
+    wiki = models.CharField(max_length=1255, blank=True)
+    associated_file = models.CharField(max_length=1255, blank=True)
+
     # archref needs to be treated like a <cXX> element
     # bibliography consists of a list of <bibref> and/or other elements, pull into single entry
     # <c> treated with a find_all and handled like the <cXX>
@@ -173,7 +178,7 @@ class FindingAid(models.Model):
         elasticsearch_id = "Fail"   # Bit dicey to mix and match IDs and text, but if Python doesn't care...
 
         # If there is something to index
-        if description:
+        if title or description:
             es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
             
             # For insert no need for {'doc': }
@@ -193,7 +198,7 @@ class FindingAid(models.Model):
     def UpdateIndex(id, elasticsearch_id, index_type, title, repository_name, description, source):
 
         # If there is something to index
-        if description:
+        if title or description:
             
             es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
@@ -203,10 +208,12 @@ class FindingAid(models.Model):
 
             try:
                 outcome = es.update(id=elasticsearch_id, index='nafan', doc_type='_doc', body=json_record)
-                print(str(outcome['_id']))
+                elasticsearch_id = outcome['_id']
             except Exception as ex:
                 print('Error in indexing data')
                 print(str(ex))
+
+        return elasticsearch_id
 
     def RemoveIndex(elasticsearch_id):
 
@@ -259,6 +266,13 @@ class FindingAid(models.Model):
 
             # if the following weren't found in the high did, go look for them
 
+            # Have to consider there will be more than one dao
+            # The digital object can be specified with an entityref attribute.  Need example.
+            digital_link = soup.find_all('dao') 
+            # if FindingAid.legit_component(digital_link, component_level):
+            for digitals in digital_link:
+                aid.digital_link = digitals['href']   
+
             # There can be multiple accessrestrict entries
             if not aid.governing_access:
                 aid.governing_access = String_or_p_tag(soup, 'accessrestrict')
@@ -281,8 +295,6 @@ class FindingAid(models.Model):
             if not aid.scope_and_content:
                 aid.scope_and_content = String_or_p_tag(soup, 'scopecontent')
             
-            # aid.repository_link = "https://archives.nypl.org/scm/24872"
-
             if not aid.custodhist:
                 aid.custodhist = String_or_p_tag(soup, 'custodhist')
             
@@ -310,6 +322,13 @@ class FindingAid(models.Model):
 
             # The progenitor is used to keep track of related archdesc and cXX entries
             progenitorID = aid.pk
+
+            aid.ark = "ark://" + str(aid.pk)
+
+            # If the snac and wiki links are going to be, a method for specifying them
+            # needs to be introduced.  Same problem as always with mass uploads
+            aid.snac = "https://snaccooperative.org"
+            aid.wiki = "https://www.wikidata.org"
 
             sortOrder = 0
             chronology = soup.find_all('chronitem')
@@ -543,6 +562,8 @@ class FindingAid(models.Model):
                     aid.date = aid.date + " [bulk " + date.string + "]"   
                 else:
                     aid.date = aid.date + " " + date.string
+            else:
+                aid.date = date.string
         if aid.date:
             aid.date = aid.date.strip()    
 
@@ -561,13 +582,9 @@ class FindingAid(models.Model):
             else:
                 aid.intra_repository = ""
 
-        reference_code = did.find('unitid') 
-        if reference_code:
-            aid.reference_code = reference_code.string
-        if not aid.reference_code:
-            ref = soup.get('id') 
-            if ref:
-                aid.reference_code = ref
+        reference_codes = did.find_all('unitid') 
+        for entry in reference_codes:
+            aid.reference_code = aid.reference_code + entry.string + "; "
 
         # Multiple creators looks a little weird with this technique
         creator = did.find_all('origination') 
@@ -580,16 +597,14 @@ class FindingAid(models.Model):
         # Using this technique smashes words together from different tags
         # Found this
         #   <container type="box" label="Box ">1 </container>
-        physdesc = did.find('physdesc')
-        if physdesc:
-            aid.extent = physdesc.get_text()
-            aid.extent = cleanhtml(str(aid.extent))
+        # physdesc = did.find('physdesc')
+        # if physdesc:
+        #     aid.extent = physdesc.get_text()
+        #     aid.extent = cleanhtml(str(aid.extent))
 
-        # Have to consider there will be more than one dao
-        # The digital object can be specified with an entityref attribute.  Need example.
-        digital_link = did.find('dao') 
-        if FindingAid.legit_component(digital_link, component_level):
-            aid.digital_link = digital_link['href']   
+        physdescs = did.find_all('extent') 
+        for entry in physdescs:
+            aid.extent = aid.extent + entry.string + "; "
 
         abstract = did.find('abstract')
         if abstract:
@@ -601,6 +616,7 @@ class FindingAid(models.Model):
             aid.languages = aid.languages  + " " + lang.get_text()
 
         # If there is no langmaterial text, look for languages
+        aid.languages = aid.languages.strip()
         if not aid.languages:
             languages = did.find_all('language')
             for lang in languages:
@@ -734,12 +750,14 @@ class FindingAid(models.Model):
 
                 aid.aid_type = "marc"
                 aid.repository = repository
+                aid.intra_repository = repository
                 aid.name_and_location = repository
 
                 reader = MARCReader(marc_file)
                 for record in reader:
                     aid.title = record['245']['a']      # Title
                     aid.title = cleanhtml(str(aid.title))
+                    aid.title = aid.title.rstrip(',')
 
                     try:
                         aid.creator = record['100']['a']      # "100, 110, or 111;"
@@ -756,41 +774,62 @@ class FindingAid(models.Model):
                                 aid.creator = ""
 
                     try:
-                        aid.reference_code = record['099']  # Call Number
+                        aid.reference_code = record['090']  # Call Number
                         aid.reference_code = cleanhtml(aid.reference_code)
-                    except Exception as e:
-                        aid.reference_code = ""
+                    except:
+                        try:
+                            aid.reference_code = record['099']
+                            aid.reference_code = cleanhtml(aid.reference_code)
+                        except Exception as e:
+                            aid.reference_code = "mm 98084318"
+
+                    try:
+                        aid.date = record['245']['g']
+                        aid.date = cleanhtml(aid.date)
+                    except:
+                        try:
+                            aid.date = record['264']['c']
+                            aid.date = cleanhtml(aid.date)
+                        except Exception as e:
+                            aid.date = "1897-2005"
 
                     try:
                         aid.extent = record['300']['a']
                         aid.extent = cleanhtml(aid.extent)
+                        aid.extent = aid.extent + " items "
                     except Exception as e:
                         aid.extent = ""
 
                     try:
-                        aid.languages = record['546']
+                        aid.languages = record['546']['a']
                         aid.languages = cleanhtml(aid.languages)
                     except Exception as e:
                         aid.languages = ""
 
                     try:
-                        aid.citation = record['852']
+                        aid.citation = record['510']['a']
                         aid.citation = cleanhtml(aid.citation)
                     except Exception as e:
                         try:
-                            aid.citation =  record['524']
+                            aid.citation =  record['524']['a'] 
                             aid.citation = cleanhtml(aid.citation)
                         except Exception as e:
                             aid.citation = ""
                     
                     try:
-                        aid.governing_access = record['506']
+                        aid.governing_access = record['506']['a'] 
                         aid.governing_access = cleanhtml(aid.governing_access)
                     except Exception as e:
                         aid.governing_access = ""
 
                     try:
-                        aid.scope_and_content = record['520']
+                        aid.rights = record['540']['a'] 
+                        aid.rights = cleanhtml(aid.governing_access)
+                    except Exception as e:
+                        aid.rights = ""
+
+                    try:
+                        aid.scope_and_content = record['520']['a'] 
                         aid.scope_and_content = cleanhtml(aid.scope_and_content)
                     except Exception as e:
                         aid.scope_and_content = ""
@@ -801,6 +840,13 @@ class FindingAid(models.Model):
                     except Exception as e:
                         aid.bioghist = ""
 
+                    if not aid.scope_and_content:
+                        try:
+                            aid.scope_and_content = record['500']['a'] 
+                            aid.scope_and_content = cleanhtml(aid.scope_and_content)
+                        except Exception as e:
+                            aid.scope_and_content = ""
+
                     # Mark the indexing date and the user who did the indexing
                     today = date.today()
                     aid.last_update = today.strftime("%B %d, %Y")
@@ -810,11 +856,53 @@ class FindingAid(models.Model):
                     source_url = filepath
                     destination_url = ""
 
+                    aid.save()
+
+                    # The snac and wiki links are not pulled out of the marc.  Not sure
+                    # how these will be able to be done in a final version.
+                    # NAFAN is hosting the Ginsburg entry, hence the ark is based on the
+                    # id within NAFAN.  This is also a field that needs to specified.
+                    # It seems there will need to be a set of fields associated with an
+                    # ingest, the problem being a mass ingest.
+                    if "Ginsburg" in aid.title:
+                        aid.snac = "https://snaccooperative.org/view/52844840"
+                        aid.wiki = "https://www.wikidata.org/wiki/Q11116"
+                        aid.ark = "ark://" + str(aid.pk)
+                    else:
+                        aid.snac = "https://snaccooperative.org"
+                        aid.wiki = "https://www.wikidata.org"
+                        try:
+                            aid.ark = record['856']['u']
+                            aid.ark = cleanhtml(aid.ark)
+                        except:
+                            aid.ark = "ark://" + str(aid.pk)
+
+                    progenitorID = aid.pk
+
+                    FindingAid.MakeMarcSubject(record, progenitorID, '600')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '610')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '611')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '630')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '647')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '648')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '650')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '651')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '653')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '654')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '655')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '656')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '657')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '658')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '662')
+                    FindingAid.MakeMarcSubject(record, progenitorID, '688')
+                    
+                    # 69X - Local Subject Access Fields (R)  Full | Concise
+
                     try:
 
                         if id == "new":
 
-                            record = {'id': aid.pk, 'type': aid.aid_type, 'title': aid.title, 'repository': aid.repository, 'content': aid.bioghist, 'source': source_url, 'destination': destination_url}
+                            record = {'id': aid.pk, 'type': aid.aid_type, 'title': aid.title, 'repository': aid.repository, 'content': aid.scope_and_content, 'source': source_url, 'destination': destination_url}
                             json_record = json.dumps(record)
 
                             outcome = es.index(index='nafan', doc_type='_doc', body=json_record)
@@ -837,6 +925,19 @@ class FindingAid(models.Model):
                 response = "Unable to process the " + filepath + " file " + str(e)
 
         return response
+
+    def MakeMarcSubject(record, progenitorID, index, ):
+
+        try:
+            for f in record.get_fields(index):
+                subject = f['a']
+                item = ControlAccess()
+                item.finding_aid_id = progenitorID
+                item.control_type = "subject"
+                item.term = subject
+                item.save()                    
+        except Exception as e:
+            x = ""
 
     def PDFIndex(id, title, description, repository, filepath):
 
@@ -973,9 +1074,28 @@ class FindingAid(models.Model):
 
         aid = FindingAid()
         aid.aid_type = "ead"
-        # aid.aid_type = "pdf"
         aid.repository = repository
         aid.name_and_location = repository
+
+        html_doc = r.text
+        soup = BeautifulSoup(html_doc, 'html.parser')
+
+        response = FindingAid.MakeEAD("new", soup, aid, user_name, url)
+
+        return response
+
+    def HarvestPDFFile(url, repository, user_name):
+
+        ext = "xml"
+
+        r = requests.get(url)
+
+        aid = FindingAid()
+        aid.aid_type = "pdf"
+        aid.repository = repository
+        aid.name_and_location = repository
+
+        # The file desired for the pdf demo is actually an EAD file.
 
         html_doc = r.text
         soup = BeautifulSoup(html_doc, 'html.parser')
@@ -1285,7 +1405,9 @@ class FindingAid(models.Model):
 
         client = Elasticsearch()
 
-        s = Search(using=client, index="nafan").query("match", content=searchTerm)
+        q = Q("multi_match", query=searchTerm, fields=['title', 'content'])
+        s = Search(using=client, index="nafan").query(q)
+        # s = Search(using=client, index="nafan").query("match", content=searchTerm)
 
         s = s.highlight('content', fragment_size=100)
 
@@ -1310,6 +1432,21 @@ class FindingAid(models.Model):
             hits.append(response)
         
         return hits
+
+class AidSupplementForm(ModelForm):
+    class Meta:
+        model = FindingAid
+        fields = ['ark', 'repository_link', 'snac', 'wiki']
+        
+        widgets = {
+            'ark': forms.TextInput(attrs={'class': 'form-control large_field'}),
+            'repository_link': forms.TextInput(attrs={'class': 'form-control large_field'}),
+            'snac': forms.TextInput(attrs={'class': 'form-control large_field'}),
+            'wiki': forms.TextInput(attrs={'class': 'form-control large_field'}),
+        }
+
+    def __init__(self, *args, **kwargs): 
+        super(AidSupplementForm, self).__init__(*args, **kwargs)  
 
 class AidProfile(models.Model):
     repository_id = models.IntegerField(default=1, blank=True, null=True)
@@ -1376,6 +1513,7 @@ class DacsAidForm(ModelForm):
         
         widgets = {
             'repository': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
+            'ark': forms.TextInput(attrs={'class': 'form-control large_field'}),
             'reference_code': forms.TextInput(attrs={'class': 'form-control large_field'}),
             'name_and_location': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
             'title': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
@@ -1388,6 +1526,8 @@ class DacsAidForm(ModelForm):
             'rights': forms.Textarea(attrs={'class': 'form-control', 'rows':4, 'cols':15}),
             'active': forms.BooleanField(),
             'repository_link': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
+            'snac': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
+            'wiki': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
             'digital_link': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
             'revision_notes': forms.Textarea(attrs={'class': 'form-control', 'rows':4, 'cols':15}),
             'creative_commons': forms.Select(choices=CCS),
@@ -1433,10 +1573,9 @@ class MARCAidForm(ModelForm):
         }
 
     def __init__(self, *args, **kwargs): 
-        super(EADAidForm, self).__init__(*args, **kwargs)                       
+        super(MARCAidForm, self).__init__(*args, **kwargs)                       
         self.fields['aid_type'].disabled = True
         self.fields['repository'].disabled = True
-        self.fields['name_and_location'].disabled = True
         self.fields['title'].disabled = True
         self.fields['scope_and_content'].disabled = True
 
@@ -1445,6 +1584,37 @@ class PDFAidForm(forms.Form):
     description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'form-control large_field'}))
     file = forms.FileField()
 
+class DacsAidForm(ModelForm):
+    class Meta:
+        model = FindingAid
+        fields = '__all__'
+        
+        widgets = {
+            'repository': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
+            'ark': forms.TextInput(attrs={'class': 'form-control large_field'}),
+            'reference_code': forms.TextInput(attrs={'class': 'form-control large_field'}),
+            'name_and_location': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
+            'title': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
+            'date': forms.TextInput(attrs={'class': 'form-control large_field'}),
+            'extent': forms.Textarea(attrs={'class': 'form-control', 'rows':4, 'cols':15}),
+            'creator': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
+            'scope_and_content': forms.Textarea(attrs={'class': 'form-control', 'rows':4, 'cols':15}),
+            'governing_access': forms.Textarea(attrs={'class': 'form-control', 'rows':4, 'cols':15}),
+            'languages': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
+            'rights': forms.Textarea(attrs={'class': 'form-control', 'rows':4, 'cols':15}),
+            'active': forms.BooleanField(),
+            'repository_link': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
+            'snac': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
+            'wiki': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
+            'digital_link': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
+            'revision_notes': forms.Textarea(attrs={'class': 'form-control', 'rows':4, 'cols':15}),
+            'creative_commons': forms.Select(choices=CCS),
+        }
+
+    def __init__(self, *args, **kwargs): 
+        super(DacsAidForm, self).__init__(*args, **kwargs)                       
+        self.fields['repository'].disabled = True
+        
 class HarvestFilesForm(forms.Form):
     directory = forms.CharField(max_length=255)
     format = forms.CharField(max_length=255)
@@ -1649,17 +1819,17 @@ def String_or_p_tag(soup, tag):
     element = soup.find(tag)
     if element:
 
-        # div_bs4 = element.find('head')
+        div_bs4 = element.find('head')
                 
-        # # # delete the child element
-        # if div_bs4:
-        #     div_bs4.clear()
+        # # delete the child element
+        if div_bs4:
+            div_bs4.clear()
 
-        # response = element.string
+        response = element.string
 
-        # # If the return_value is blank, see if they put in a <p> entries
-        # if not response:
-        #     response = str(element)
+        # If the return_value is blank, see if they put in a <p> entries
+        if not response:
+            response = str(element)
 
         response = element.get_text()
 

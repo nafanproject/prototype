@@ -331,7 +331,7 @@ def extract_uploaded_zip(filename):
 
 
 def save_uploaded_file(f):
-    filename = os.path.join(settings.BASE_DIR, 'uploads', f.name)
+    filename = os.path.join(settings.BASE_DIR, 'media', f.name)
     with open(filename, 'wb') as destination:
         for chunk in f.chunks():
             destination.write(chunk)

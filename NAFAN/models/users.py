@@ -70,7 +70,7 @@ class NAFANUser(models.Model):
 
         return user
 
-USER_TYPES = [('researcher', 'Researcher'), ('contributor', 'Contributor'), ('contributor_admin', 'Contributor Admin'), ('nafan_admin', 'Nafan Admin')]
+USER_TYPES = [('contributor', 'Contributor'), ('contributor_admin', 'Contributor Admin'), ('nafan_admin', 'Nafan Admin')]
 STATUS = [('Active', 'Active'), ('Inactive', 'Inactive')]
 
 class NAFANUserForm(ModelForm):
