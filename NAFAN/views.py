@@ -956,7 +956,8 @@ def edit_dacs(request, id):
     context["repository_id"] = request.session['active_repository']
     context["repository_name"] = obj.repository
     context["finding_aid_id"] = id
-    context["subject_headers"] = FindingAidSubjectHeader.GetSubjectHeaders(id)
+    # context["subject_headers"] = FindingAidSubjectHeader.GetSubjectHeaders(id)
+    context["subject_headers"] = ControlAccess.objects.filter(finding_aid_id=id,control_type="subject").order_by('term')
     context["audit"] = FindingAidAudit.GetAudit(id)
 
     return render(request, "FindingAids/edit_dacs.html", context)
@@ -1058,6 +1059,8 @@ def edit_pdf(request, id):
     context['finding_aid_id']= id
     context['repository_id']= request.session['active_repository']
     context['associated_file']= associated_file
+    # context["subject_headers"] = FindingAidSubjectHeader.GetSubjectHeaders(id)
+    context["subject_headers"] = ControlAccess.objects.filter(finding_aid_id=id,control_type="subject").order_by('term')
 
     return render(request, "FindingAids/edit_pdf.html", context)
 
@@ -1086,7 +1089,13 @@ def add_subject_header(request):
     subject_header = request.GET.get('subject_header', None)
     aid_id = request.GET.get('aid_id', None)
 
-    FindingAidSubjectHeader.AddSubjectHeader(aid_id, subject_header)
+    item = ControlAccess()
+    item.finding_aid_id = aid_id
+    item.control_type = "subject"
+    item.term = subject_header
+    item.save()
+
+    # FindingAidSubjectHeader.AddSubjectHeader(aid_id, subject_header)
 
     from django.http import JsonResponse
     return JsonResponse({'result':'true'})
@@ -1097,7 +1106,7 @@ def delete_subject_header(request, id):
     context ={}
  
     # fetch the object related to passed id
-    obj = get_object_or_404(FindingAidSubjectHeader, id = id)
+    obj = get_object_or_404(ControlAccess, id = id)
  
     # delete object
     obj.delete()
