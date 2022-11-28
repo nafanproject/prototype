@@ -402,7 +402,7 @@ max-width: 100px;
 
                             {% for data in subject_headers %}
                               <tr> 
-                                <td>{{ data.subject_header }}</td>
+                                <td>{{ data.term }}</td>
                                 <td><a href='/FindingAids/delete_subject_header/{{ data.pk }}'"> Delete</a></td>
                               </tr>
                             {% endfor %}
