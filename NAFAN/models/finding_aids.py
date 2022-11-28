@@ -541,15 +541,21 @@ class FindingAid(models.Model):
         if FindingAid.legit_component(title, component_level):
             aid.title = title.string
 
-        if not aid.title:
-            searched_title = title.next
-            if searched_title:
-                aid.title = searched_title.string
+        try:
+            if not aid.title:
+                if title:
+                    searched_title = title.next
+                    if searched_title:
+                        aid.title = searched_title.string
 
-        if not aid.title:
-            subtitle = title.find('title')
-            if subtitle:
-                aid.title = subtitle.string
+            if not aid.title:
+                subtitle = title.find('title')
+                if subtitle:
+                    aid.title = subtitle.string
+
+        except Exception as ex:
+            print('Error getting title')
+            print(str(ex))
 
         if not aid.title:
             aid.title = "No title"
@@ -606,9 +612,16 @@ class FindingAid(models.Model):
         for entry in physdescs:
             aid.extent = aid.extent + entry.string + "; "
 
-        abstract = did.find('abstract')
-        if abstract:
-            aid.abstract = abstract.string
+        aid.abstract = String_or_p_tag(did, 'abstract')
+
+        # abstract = did.find('abstract')
+        # if abstract:
+        #     aid.abstract = abstract.string
+
+        # if not aid.abstract:
+        #     searched_abstract = abstract.next
+        #     if searched_abstract:
+        #         aid.abstract = searched_abstract.string
 
         # First see if langmaterial has text
         languages = did.find_all('langmaterial')
