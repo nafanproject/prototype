@@ -231,11 +231,11 @@ max-width: 100px;
     <div class="row top-buffer">
 
         <div class="col-sm-3">
-            {% if user_type == "nafan_admin" %}
-            <a href="/Admin/nafan_admin">Back to Dashboard Home</a>
-            {% else %}
-            <a href="/contributor_admin">Back to Dashboard Home</a>
-            {% endif %}
+          {% if user_type == "nafan_admin" %}
+          <a href="{% url 'nafan_admin' %}">Back to Dashboard Home</a>
+          {% else %}
+          <a href="{% url 'contributor_admin' %}">Back to Dashboard Home</a>
+          {% endif %}
         </div>
 
       <div class="col-sm-7">
@@ -259,7 +259,8 @@ max-width: 100px;
             <div class="form_field_container" id="search_area">
               <select class="form-control medium_field manage_search" id="search_field" name="search_field">
                 <option value="email">Username</option>
-                <option value="full_name">Full Name</option>
+                <option value="first_name">First Name</option>
+                <option value="last_name">Last Name</option>
               </select>
               <input type="text" class="form-control manage_search medium_field" id="search_term"  name="search_term">
               <button type="submit" class="btn btn-primary manage_search" id="search"><span class="fa fa-search" aria-hidden="true"></span> Search</button>

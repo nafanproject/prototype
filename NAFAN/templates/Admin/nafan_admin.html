@@ -253,9 +253,9 @@ max-width: 100px;
 	<div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8">
 
-          <b><a href="/Repositories/repositories">Repositories</a></b>&nbsp;&nbsp;&nbsp;&nbsp;
-          <b><a href="/Users/users">Users</a></b>&nbsp;&nbsp;&nbsp;&nbsp;
-          <b><a href="/Admin/audit">Audit</a></b>&nbsp;&nbsp;&nbsp;&nbsp;
+          <b><a href="{% url 'repositories' %}">Repositories</a></b>&nbsp;&nbsp;&nbsp;&nbsp;
+          <b><a href="{% url 'users' %}">Users</a></b>&nbsp;&nbsp;&nbsp;&nbsp;
+          <b><a href="{% url 'audit' %}">Audit</a></b>&nbsp;&nbsp;&nbsp;&nbsp;
 
           {% if action_items.count > 0 %}
             <br/><br/>

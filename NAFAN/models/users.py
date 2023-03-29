@@ -35,6 +35,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = _('user')
         verbose_name_plural = _('users')
 
+    def full_name(self):
+        return "{} {}".format(self.first_name, self.last_name)
+
     def GetUsers(searchField, searchTerm, status):
 
         results = []
@@ -44,11 +47,16 @@ class User(AbstractBaseUser, PermissionsMixin):
                     results = User.objects.filter(email__icontains=searchTerm).filter(status=status).order_by('email')
                 else:
                     results = User.objects.filter(email__icontains=searchTerm).order_by('email')
-            else:
+            elif searchField == "first_name":
                 if status:
-                    results = User.objects.filter(full_name__icontains=searchTerm).filter(status=status).order_by('email')
+                    results = User.objects.filter(first_name__icontains=searchTerm).filter(status=status).order_by('email')
                 else:
-                    results = User.objects.filter(full_name__icontains=searchTerm).order_by('email')
+                    results = User.objects.filter(first_name__icontains=searchTerm).order_by('email')
+            elif searchField == "last_name":
+                if status:
+                    results = User.objects.filter(last_name__icontains=searchTerm).filter(status=status).order_by('email')
+                else:
+                    results = User.objects.filter(last_name__icontains=searchTerm).order_by('email')
         else:
             if status:
                 results = User.objects.filter(status=status).order_by('email')
@@ -101,7 +109,6 @@ class UserForm(ModelForm):
             'email': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
             'full_name': forms.TextInput(attrs={'class': 'form-control large_field'}),
             'user_type': forms.Select(choices=USER_TYPES),
-            'password': forms.PasswordInput(attrs={'class': 'form-control large_field'}),
             'status': forms.Select(choices=STATUS),
             'notes': forms.Textarea(attrs={'class': 'form-control large_field'}),
         }

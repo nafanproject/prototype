@@ -236,12 +236,12 @@ max-width: 100px;
   <div class="row top-buffer">
 
       <div class="col-sm-2">
-          <button class="btn btn-md btn-primary float-left" type="button" onclick="location.href='/'">Home</button>
-          <button class="btn btn-md btn-primary float-left" type="button" onclick="location.href='/NAFANAdmin'">Admin</button>
+          <a class="btn btn-md btn-primary float-left" type="button" href="{% url 'home' %}">Home</a>
+          <a class="btn btn-md btn-primary float-left" type="button" href="{% url 'nafan_admin' %}">Admin</a>
       </div>
 
       <div class="col-sm-8">
-        <h2 class="page-header text-center">TraceLog</h2>
+        <h2 class="page-header text-center">Upload Repositories</h2>
       </div>
 
       <div class="col-sm-2">

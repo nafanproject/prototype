@@ -69,13 +69,13 @@ def login_success(request):
 
 
 def is_nafan_admin(user):
-    user.is_authenticated and user.user_type == "nafan_admin"
+    return user.is_authenticated and user.user_type == "nafan_admin"
 
 def is_contributor_admin(user):
-    user.is_authenticated and user.user_type == "contributor_admin"
+    return user.is_authenticated and (user.user_type == "contributor_admin" or user.user_type == "nafan_admin")
 
 def is_contributor(user):
-    user.is_authenticated and user.user_type == "contributor"
+    return user.is_authenticated and (user.user_type == "contributor" or user.user_type == "contributor_admin" or user.user_type == "nafan_admin")
 
 
 @user_passes_test(is_nafan_admin)
@@ -340,7 +340,7 @@ def delete_user(request, id):
         # list view
         return HttpResponseRedirect("/Users/users")
  
-    context["user_name"] = obj.full_name
+    context["user_name"] = obj.full_name()
 
     user = request.user
     context["user_type"] = user.user_type
@@ -519,6 +519,7 @@ def get_repository_search(request):
 def upload_repositories(request):
 
     # Upload function for RepoData file
+    print("hi!")
 
     if request.method == 'POST':
         fileName = save_uploaded_file(request.FILES['file'])
@@ -720,7 +721,7 @@ def create_dacs(request):
 
         # Assign the date and user of the last update
         user = request.user
-        aid.updated_by = user.full_name
+        aid.updated_by = user.full_name()
 
         today = date.today()
         aid.last_update = today.strftime("%B %d, %Y")
@@ -738,7 +739,7 @@ def create_dacs(request):
         aid.save()
 
         # Add the audit
-        FindingAidAudit.AddAudit(form.instance.id, notes, user.full_name, today)
+        FindingAidAudit.AddAudit(form.instance.id, notes, user.full_name(), today)
 
         return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
          
@@ -781,7 +782,7 @@ def create_pdf(request):
 
         # Assign the date and user of the last update
         user = request.user
-        aid.updated_by = user.full_name
+        aid.updated_by = user.full_name()
 
         today = date.today()
         aid.last_update = today.strftime("%B %d, %Y")
@@ -799,7 +800,7 @@ def create_pdf(request):
         aid.save()
 
         # Add the audit
-        FindingAidAudit.AddAudit(form.instance.id, notes, user.full_name, today)
+        FindingAidAudit.AddAudit(form.instance.id, notes, user.full_name(), today)
 
         return HttpResponseRedirect("/FindingAids/edit_pdf/" + str(aid.pk))
          
@@ -824,7 +825,7 @@ def ingest_ead(request):
 
                 user = request.user
 
-                FindingAid.EADIndex("new", repository.repository_name, fileName, user.full_name)
+                FindingAid.EADIndex("new", repository.repository_name, fileName, user.full_name())
             
             return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
 
@@ -845,7 +846,7 @@ def ingest_marc(request):
 
             user = request.user
 
-            FindingAid.MARCIndex("new", repository.repository_name, fileName, user.full_name)
+            FindingAid.MARCIndex("new", repository.repository_name, fileName, user.full_name())
             
             return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
 
@@ -947,7 +948,7 @@ def edit_dacs(request, id):
         aid.revision_notes = ""
 
         user = request.user
-        aid.updated_by = user.full_name
+        aid.updated_by = user.full_name()
 
         today = date.today()
         aid.last_update = today.strftime("%B %d, %Y")
@@ -955,7 +956,7 @@ def edit_dacs(request, id):
         aid.save()
 
         FindingAid.UpdateIndex(form.instance.id, esID, "dacs", aid.title, aid.repository, aid.scope_and_content, "")
-        FindingAidAudit.AddAudit(form.instance.id, notes, user.full_name, today)
+        FindingAidAudit.AddAudit(form.instance.id, notes, user.full_name(), today)
 
         return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
  
@@ -1052,7 +1053,7 @@ def edit_pdf(request, id):
 
         # Assign the date and user of the last update
         user = request.user
-        aid.updated_by = user.full_name
+        aid.updated_by = user.full_name()
 
         today = date.today()
         aid.last_update = today.strftime("%B %d, %Y")
@@ -1062,7 +1063,7 @@ def edit_pdf(request, id):
         FindingAid.UpdateIndex(aid.pk, aid.elasticsearch_id, "pdf", aid.title, aid.repository, aid.scope_and_content, "")
 
         # Add the audit
-        FindingAidAudit.AddAudit(form.instance.id, notes, user.full_name, today)
+        FindingAidAudit.AddAudit(form.instance.id, notes, user.full_name(), today)
 
         return HttpResponseRedirect("/FindingAids/finding_aids/" + str(repository.pk))
          
@@ -1149,12 +1150,12 @@ def harvest_aids(request):
 
     if harvest_profile.harvest_type == "File":
         if harvest_profile.default_format == "PDF":
-            FindingAid.HarvestPDFFile(harvest_profile.harvest_location, repository.repository_name, user.full_name)
+            FindingAid.HarvestPDFFile(harvest_profile.harvest_location, repository.repository_name, user.full_name())
         else:
-            FindingAid.HarvestEADFile(harvest_profile.harvest_location, repository.repository_name, user.full_name)
+            FindingAid.HarvestEADFile(harvest_profile.harvest_location, repository.repository_name, user.full_name())
 
     if harvest_profile.harvest_type == "Directory":
-        FindingAid.HarvestEAD(harvest_profile.harvest_location, repository.repository_name, user.full_name)
+        FindingAid.HarvestEAD(harvest_profile.harvest_location, repository.repository_name, user.full_name())
 
     if harvest_profile.harvest_type == "OAI":
         FindingAid.HarvestOAI(harvest_profile.harvest_location, repository.repository_name)

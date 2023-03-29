@@ -232,9 +232,9 @@ max-width: 100px;
 
         <div class="col-sm-3">
             {% if user_type == "nafan_admin" %}
-            <a href="/Admin/nafan_admin">Back to Dashboard Home</a>
+            <a href="{% url 'nafan_admin' %}">Back to Dashboard Home</a>
             {% else %}
-            <a href="/contributor_admin">Back to Dashboard Home</a>
+            <a href="{% url 'contributor_admin' %}">Back to Dashboard Home</a>
             {% endif %}
         </div>
 
