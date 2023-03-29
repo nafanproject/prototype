@@ -13,7 +13,7 @@ from django.http import HttpResponse, JsonResponse
 
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect
 
-from .models import NAFANLoginForm, NAFANLog, NAFANAudit, NAFANUser, NAFANUserForm, NAFANJoinUsForm
+from .models import NAFANLoginForm, NAFANLog, NAFANAudit, User, UserForm, NAFANJoinUsForm
 from .models import Repository, RepositoryForm, User_Repositories, UploadFileForm, save_uploaded_file
 from .models import FindingAid, FindingAidSubjectHeader, DacsAidForm, EADAidForm, MARCAidForm, PDFAidForm, NAFANJoinUs, AidSupplementForm
 from .models import Chronology, ControlAccess, AidProfile, AidProfileForm, HarvestProfile, HarvestProfileForm, FindingAidAudit
@@ -63,7 +63,7 @@ def NAFANLogin(request):
         form = NAFANLoginForm(request.POST)
         if form.is_valid():
 
-            user = NAFANUser.GetUser(form.cleaned_data['email'])
+            user = User.GetUser(form.cleaned_data['email'])
             if not user:
                 login_message = "Your credentials were not found"
             else:
@@ -287,19 +287,19 @@ def users(request):
     statusFilter = request.GET.get('status_filter', '')
 
     email = request.session['current_login']
-    user = NAFANUser.GetUser(email)
+    user = User.GetUser(email)
 
     if user.user_type == "nafan_admin":        
-        user_list = NAFANUser.GetUsers(searchField, searchTerm, statusFilter)
+        user_list = User.GetUsers(searchField, searchTerm, statusFilter)
     else:
-        user_list = NAFANUser.GetUsersByContributor(email, searchField, searchTerm, statusFilter)
+        user_list = User.GetUsersByContributor(email, searchField, searchTerm, statusFilter)
    
     # add the dictionary during initialization
-    # context["dataset"] = NAFANUser.objects.all().order_by("email")
+    # context["dataset"] = User.objects.all().order_by("email")
     context["dataset"] = user_list
 
     email = request.session['current_login']
-    user = NAFANUser.GetUser(email)
+    user = User.GetUser(email)
     context["user_type"] = user.user_type
 
     return render(request, "Users/users.html", context)
@@ -310,7 +310,7 @@ def create_user(request):
     context ={}
 
     # add the dictionary during initialization
-    form = NAFANUserForm(request.POST or None)
+    form = UserForm(request.POST or None)
     if form.is_valid():
         user = form.save()
 
@@ -324,7 +324,7 @@ def create_user(request):
     context['form']= form
 
     email = request.session['current_login']
-    user = NAFANUser.GetUser(email)
+    user = User.GetUser(email)
     context["user_type"] = user.user_type
 
     return render(request, "Users/create_user.html", context)
@@ -335,7 +335,7 @@ def delete_user(request, id):
     context ={}
  
     # fetch the object related to passed id
-    obj = get_object_or_404(NAFANUser, id = id)
+    obj = get_object_or_404(User, id = id)
  
     if request.method =="POST":
         # delete object
@@ -347,7 +347,7 @@ def delete_user(request, id):
     context["user_name"] = obj.full_name
 
     email = request.session['current_login']
-    user = NAFANUser.GetUser(email)
+    user = User.GetUser(email)
     context["user_type"] = user.user_type
 
     return render(request, "Users/delete_user.html", context)
@@ -358,10 +358,10 @@ def update_user(request, id):
     context ={}
  
     # fetch the object related to passed id
-    obj = get_object_or_404(NAFANUser, id = id)
+    obj = get_object_or_404(User, id = id)
  
     # pass the object as instance in form
-    form = NAFANUserForm(request.POST or None, instance = obj)
+    form = UserForm(request.POST or None, instance = obj)
  
     # save the data from the form and
     # redirect to detail_view
@@ -375,7 +375,7 @@ def update_user(request, id):
     context["audit"] = NAFANAudit.GetAudit(id, NAFANAudit.USER_TARGET)
  
     email = request.session['current_login']
-    user = NAFANUser.GetUser(email)
+    user = User.GetUser(email)
     context["user_type"] = user.user_type
 
     return render(request, "Users/update_user.html", context)
@@ -416,7 +416,7 @@ def repositories(request):
         request.session['repository_search_status'] = status
 
     email = request.session['current_login']
-    user = NAFANUser.GetUser(email)
+    user = User.GetUser(email)
 
     # Get the set of repositories to show the user based on role and assignments
 
@@ -451,7 +451,7 @@ def create_repository(request):
     context['form']= form
 
     email = request.session['current_login']
-    user = NAFANUser.GetUser(email)
+    user = User.GetUser(email)
     context["user_type"] = user.user_type
 
     return render(request, "Repositories/create_repository.html", context)
@@ -487,7 +487,7 @@ def update_repository(request, id):
     context["form"] = form
 
     email = request.session['current_login']
-    user = NAFANUser.GetUser(email)
+    user = User.GetUser(email)
     context["user_type"] = user.user_type
 
     return render(request, "Repositories/update_repository.html", context)
@@ -549,7 +549,7 @@ def user_repositories(request, id):
     searchTerm = request.GET.get('search_term', '')
 
     email = request.session['current_login']
-    log_user = NAFANUser.GetUser(email)
+    log_user = User.GetUser(email)
 
     repositories = []
 
@@ -560,7 +560,7 @@ def user_repositories(request, id):
         else:
             repositories = User_Repositories.GetRepositories(email)
 
-    user = get_object_or_404(NAFANUser, id = id)
+    user = get_object_or_404(User, id = id)
     user_repositories = User_Repositories.GetRepositories(user.email)
 
     return render(request,'Users/user_repositories.html',
@@ -602,7 +602,7 @@ def finding_aids(request, id):
     context["repositories"] = User_Repositories.GetRepositories(request.session['current_login'])
         
     email = request.session['current_login']
-    user = NAFANUser.GetUser(email)
+    user = User.GetUser(email)
     context['user_type'] = user.user_type
     context['repository_name'] = repository.repository_name
 
@@ -638,7 +638,7 @@ def aid_profile(request):
     context['repository_id']= request.session['active_repository']
 
     email = request.session['current_login']
-    user = NAFANUser.GetUser(email)
+    user = User.GetUser(email)
     context["user_type"] = user.user_type
 
     return render(request, "FindingAids/aid_profile.html", context)
@@ -718,7 +718,7 @@ def create_dacs(request):
         aid.revision_notes = ""
 
         # Assign the date and user of the last update
-        user = NAFANUser.GetUser(request.session['current_login'])
+        user = User.GetUser(request.session['current_login'])
         aid.updated_by = user.full_name
 
         today = date.today()
@@ -778,7 +778,7 @@ def create_pdf(request):
         aid.revision_notes = ""
 
         # Assign the date and user of the last update
-        user = NAFANUser.GetUser(request.session['current_login'])
+        user = User.GetUser(request.session['current_login'])
         aid.updated_by = user.full_name
 
         today = date.today()
@@ -819,7 +819,7 @@ def ingest_ead(request):
 
                 fileName = save_uploaded_file(f)
 
-                user = NAFANUser.GetUser(request.session['current_login'])
+                user = User.GetUser(request.session['current_login'])
 
                 FindingAid.EADIndex("new", repository.repository_name, fileName, user.full_name)
             
@@ -839,7 +839,7 @@ def ingest_marc(request):
         if form.is_valid():
             fileName = save_uploaded_file(request.FILES['file'])
 
-            user = NAFANUser.GetUser(request.session['current_login'])
+            user = User.GetUser(request.session['current_login'])
 
             FindingAid.MARCIndex("new", repository.repository_name, fileName, user.full_name)
             
@@ -938,7 +938,7 @@ def edit_dacs(request, id):
         notes = aid.revision_notes
         aid.revision_notes = ""
 
-        user = NAFANUser.GetUser(request.session['current_login'])
+        user = User.GetUser(request.session['current_login'])
         aid.updated_by = user.full_name
 
         today = date.today()
@@ -1040,7 +1040,7 @@ def edit_pdf(request, id):
         aid.revision_notes = ""
 
         # Assign the date and user of the last update
-        user = NAFANUser.GetUser(request.session['current_login'])
+        user = User.GetUser(request.session['current_login'])
         aid.updated_by = user.full_name
 
         today = date.today()
@@ -1131,7 +1131,7 @@ def harvest_aids(request):
         # if format == "ead":
         #     FindingAid.HarvestEAD(directory, repository.repository_name)
 
-    user = NAFANUser.GetUser(request.session['current_login'])
+    user = User.GetUser(request.session['current_login'])
 
     if harvest_profile.harvest_type == "File":
         if harvest_profile.default_format == "PDF":
@@ -1157,7 +1157,7 @@ def harvest_profiles(request):
     context['repository_id'] = request.session['active_repository']
 
     email = request.session['current_login']
-    user = NAFANUser.GetUser(email)
+    user = User.GetUser(email)
     context["user_type"] = user.user_type
 
     return render(request, "FindingAids/harvest_profiles.html", context)
