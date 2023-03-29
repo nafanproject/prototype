@@ -6,7 +6,13 @@ from django.conf.urls.static import static
 urlpatterns = [
     path("", views.home, name="home"),
     path("index", views.home, name="home"),
-    path("nafanlogin/", views.NAFANLogin, name="NAFANLogin"),
+
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('login_success/', views.login_success, name="login_success"),
+
+    #path("nafanlogin/", views.NAFANLogin, name="NAFANLogin"),
+    #path('logout/', views.NAFANlogout, name='logout'),
+
     path("forgot_password/", views.forgot_password, name="forgot_password"),
     path("help/<str:topic>", views.help, name="help"),    
     path("search_results/", views.search_results, name="search_results"),
@@ -17,11 +23,9 @@ urlpatterns = [
     path('Browse_Repository_Entries/<int:id>', views.Browse_Repository_Entries, name="Browse_Repository_Entries" ),
     path('view_aid_preliminary/<int:id>', views.view_aid_preliminary, name="view_aid_preliminary" ),
     path('view_aid_public/<int:id>', views.view_aid_public, name="view_aid_public" ),
-    path('accounts/', include('django.contrib.auth.urls')),
     path("contributor/", views.contributor, name="contributor"),
     path("contributor_admin/", views.contributor_admin, name="contributor_admin"),
     path("researcher/", views.researcher, name="researcher"),
-    path('logout/', views.NAFANlogout, name='logout'),
 
     path("Admin/nafan_admin/", views.nafan_admin, name="nafan_admin"),
     path('Admin/upload_repositories/', views.upload_repositories, name='upload_repositories'),

@@ -21,6 +21,8 @@ from .models import Chronology, ControlAccess, AidProfile, AidProfileForm, Harve
 import lxml.etree as ET
 import os
 
+from django.contrib.auth.decorators import login_required, user_passes_test
+
 # Public
 
 def home(request):
@@ -55,36 +57,28 @@ def search_results(request):
 
 # Each user type is presented with a different page on login, hence the redirects
 
-def NAFANLogin(request):
-
-    login_message = ""
-    if request.method == 'POST':
-
-        form = NAFANLoginForm(request.POST)
-        if form.is_valid():
-
-            user = User.GetUser(form.cleaned_data['email'])
-            if not user:
-                login_message = "Your credentials were not found"
-            else:
-                request.session['current_login'] = user.email
-
-                if user.user_type == "nafan_admin":
-                    return redirect("nafan_admin")
-                else:
-                    if user.user_type == "contributor_admin":
-                        return redirect("contributor_admin")
-                    else:                   
-                        if user.user_type == "contributor":
-                            return redirect("contributor")
-                        else:
-                            return redirect("researcher")
-
+def login_success(request):
+    if request.user.user_type == "nafan_admin":
+        return redirect("nafan_admin")
+    elif request.user.user_type == "contributor_admin":
+        return redirect("contributor_admin")
+    elif request.user.user_type == "contributor":
+        return redirect("contributor")
     else:
-        form = NAFANLoginForm()
+        return redirect("researcher")
 
-    return render(request, 'NAFAN/NAFANLogin.html', {'form': form, 'login_message': login_message})
 
+def is_nafan_admin(user):
+    user.is_authenticated and user.user_type == "nafan_admin"
+
+def is_contributor_admin(user):
+    user.is_authenticated and user.user_type == "contributor_admin"
+
+def is_contributor(user):
+    user.is_authenticated and user.user_type == "contributor"
+
+
+@user_passes_test(is_nafan_admin)
 def nafan_admin(request):
     context ={}
        
@@ -93,12 +87,14 @@ def nafan_admin(request):
 
     return render(request, "Admin/nafan_admin.html", context)
 
+@user_passes_test(is_contributor_admin)
 def contributor_admin(request):
     return render(request, "Admin/contributor_admin.html")
 
+@user_passes_test(is_contributor)
 def contributor(request):
 
-    user_email = request.session['current_login']
+    user_email = request.user.email
 
     # Find the repositories for a user so the finding aids page can be populated with them
     repositories = User_Repositories.GetRepositories(user_email)
@@ -108,6 +104,7 @@ def contributor(request):
 
     return HttpResponseRedirect("/FindingAids/finding_aids/" + str(repository.id))
 
+@login_required
 def researcher(request):
     return render(request, "NAFAN/researcher.html")
 
@@ -152,6 +149,7 @@ def help(request, topic):
 
 # Clear a join request after the NAFAN admin has done something with the request
 
+@user_passes_test(is_nafan_admin)
 def clear_join(request, id):
 
     context ={}
@@ -254,9 +252,9 @@ def view_aid_public(request, id):
 
     return render(request, "NAFAN/view_aid_public.html", context)
 
-def NAFANlogout(request):
+def logout_view(request):
     logout(request)
-    return render(request, "NAFAN/index.html")
+    return HttpResponseRedirect("/")
 
 
 # Admin
@@ -279,6 +277,7 @@ def audit(request):
 
 # Users
 
+@login_required
 def users(request):
     context ={}
  
@@ -286,24 +285,21 @@ def users(request):
     searchTerm = request.GET.get('search_term', '')
     statusFilter = request.GET.get('status_filter', '')
 
-    email = request.session['current_login']
-    user = User.GetUser(email)
+    user = request.user
 
     if user.user_type == "nafan_admin":        
         user_list = User.GetUsers(searchField, searchTerm, statusFilter)
     else:
-        user_list = User.GetUsersByContributor(email, searchField, searchTerm, statusFilter)
+        user_list = User.GetUsersByContributor(user.email, searchField, searchTerm, statusFilter)
    
     # add the dictionary during initialization
     # context["dataset"] = User.objects.all().order_by("email")
     context["dataset"] = user_list
-
-    email = request.session['current_login']
-    user = User.GetUser(email)
     context["user_type"] = user.user_type
 
     return render(request, "Users/users.html", context)
 
+@user_passes_test(is_contributor_admin)
 def create_user(request):
     # dictionary for initial data with
     # field names as keys
@@ -314,21 +310,21 @@ def create_user(request):
     if form.is_valid():
         user = form.save()
 
-        repositories = Repository.GetUserRepositories(request.session['current_login'])
+        repositories = Repository.GetUserRepositories(request.user)
         for repo in repositories:
             User_Repositories.AssignRepository(user.email, repo)
 
-        NAFANAudit.AddAudit(user.pk, NAFANAudit.USER_TARGET, NAFANAudit.CREATE_ACTION, request.session['current_login'], form.cleaned_data['notes'])
+        NAFANAudit.AddAudit(user.pk, NAFANAudit.USER_TARGET, NAFANAudit.CREATE_ACTION, request.user, form.cleaned_data['notes'])
         return HttpResponseRedirect("/Users/users")
          
     context['form']= form
 
-    email = request.session['current_login']
-    user = User.GetUser(email)
+    user = request.user
     context["user_type"] = user.user_type
 
     return render(request, "Users/create_user.html", context)
 
+@user_passes_test(is_contributor_admin)
 def delete_user(request, id):
     # dictionary for initial data with
     # field names as keys
@@ -346,12 +342,12 @@ def delete_user(request, id):
  
     context["user_name"] = obj.full_name
 
-    email = request.session['current_login']
-    user = User.GetUser(email)
+    user = request.user
     context["user_type"] = user.user_type
 
     return render(request, "Users/delete_user.html", context)
 
+@user_passes_test(is_contributor_admin)
 def update_user(request, id):
         # dictionary for initial data with
     # field names as keys
@@ -367,15 +363,14 @@ def update_user(request, id):
     # redirect to detail_view
     if form.is_valid():
         form.save()
-        NAFANAudit.AddAudit(id, NAFANAudit.USER_TARGET, NAFANAudit.UPDATE_ACTION, request.session['current_login'], form.cleaned_data['notes'])
+        NAFANAudit.AddAudit(id, NAFANAudit.USER_TARGET, NAFANAudit.UPDATE_ACTION, request.user, form.cleaned_data['notes'])
         return HttpResponseRedirect("/Users/users")
  
     # add form dictionary to context
     context["form"] = form
     context["audit"] = NAFANAudit.GetAudit(id, NAFANAudit.USER_TARGET)
  
-    email = request.session['current_login']
-    user = User.GetUser(email)
+    user = request.user
     context["user_type"] = user.user_type
 
     return render(request, "Users/update_user.html", context)
@@ -415,8 +410,7 @@ def repositories(request):
         request.session['repository_search_term'] = searchTerm
         request.session['repository_search_status'] = status
 
-    email = request.session['current_login']
-    user = User.GetUser(email)
+    user = request.user
 
     # Get the set of repositories to show the user based on role and assignments
 
@@ -424,9 +418,10 @@ def repositories(request):
         repositories = Repository.GetRepositories(searchField, searchTerm, status)
         return render(request,'Repositories/repositories.html',{"repositories":repositories, "user_type":user.user_type})
     else:
-        repositories = Repository.GetUserRepositories(request.session['current_login'])
+        repositories = Repository.GetUserRepositories(request.user)
         return render(request,'Repositories/repositories.html',{"repositories":repositories, "user_type":user.user_type})
 
+@user_passes_test(is_nafan_admin)
 def create_repository(request):
     context ={}
  
@@ -450,12 +445,12 @@ def create_repository(request):
          
     context['form']= form
 
-    email = request.session['current_login']
-    user = User.GetUser(email)
+    user = request.user
     context["user_type"] = user.user_type
 
     return render(request, "Repositories/create_repository.html", context)
 
+@user_passes_test(is_nafan_admin)
 def update_repository(request, id):
     context ={}
  
@@ -486,12 +481,12 @@ def update_repository(request, id):
     # add form dictionary to context
     context["form"] = form
 
-    email = request.session['current_login']
-    user = User.GetUser(email)
+    user = request.user
     context["user_type"] = user.user_type
 
     return render(request, "Repositories/update_repository.html", context)
 
+@user_passes_test(is_nafan_admin)
 def delete_repository(request, id):
     context ={}
  
@@ -520,6 +515,7 @@ def get_repository_search(request):
 
     return JsonResponse({'SearchField': request.session['repository_search_field'], 'SearchTerm': request.session['repository_search_term'], 'Status': request.session['repository_search_status']})
 
+@user_passes_test(is_nafan_admin)
 def upload_repositories(request):
 
     # Upload function for RepoData file
@@ -533,23 +529,23 @@ def upload_repositories(request):
 
     return render(request, 'Repositories/upload_repositories.html', {'form': form})
 
+@user_passes_test(is_nafan_admin)
 def export_repositories(request):
 
     Repository.ExportRepositories()
     
-    #return JsonResponse({'SearchField': request.session['repository_search_field'], 'SearchTerm': request.session['repository_search_term'], 'Status': request.session['repository_search_status']})
     return HttpResponse(os.path.dirname(os.path.abspath(__file__)))
 
 
 # User Repositories
 
+@user_passes_test(is_contributor_admin)
 def user_repositories(request, id):
 
     searchField = request.GET.get('search_field', '')
     searchTerm = request.GET.get('search_term', '')
 
-    email = request.session['current_login']
-    log_user = User.GetUser(email)
+    log_user = request.user
 
     repositories = []
 
@@ -558,7 +554,7 @@ def user_repositories(request, id):
             repositories = User_Repositories.GetRepositoriesSearch(searchField, searchTerm)
             user_repositories = []
         else:
-            repositories = User_Repositories.GetRepositories(email)
+            repositories = User_Repositories.GetRepositories(log_user)
 
     user = get_object_or_404(User, id = id)
     user_repositories = User_Repositories.GetRepositories(user.email)
@@ -566,22 +562,24 @@ def user_repositories(request, id):
     return render(request,'Users/user_repositories.html',
         {"repositories":repositories, 'user_repositories': user_repositories, 'username': user.email})
 
+@user_passes_test(is_contributor_admin)
 def add_user_repository(request):
     username = request.GET.get('username', None)
     repository = request.GET.get('repository', None)
 
     User_Repositories.AssignRepository(username, repository)
-    # NAFANAudit.AddAudit(username, NAFANAudit.USER_TARGET, NAFANAudit.ADD_REPOSITORY_ACTION, request.session['current_login'], repository)
+    # NAFANAudit.AddAudit(username, NAFANAudit.USER_TARGET, NAFANAudit.ADD_REPOSITORY_ACTION, request.user, repository)
 
     from django.http import JsonResponse
     return JsonResponse({'result':'true'})
 
+@user_passes_test(is_contributor_admin)
 def remove_user_repository(request):
     username = request.GET.get('username', None)
     repository = request.GET.get('repository', None)
 
     User_Repositories.RemoveRepository(username, repository)
-    # NAFANAudit.AddAudit(username, NAFANAudit.USER_TARGET, NAFANAudit.REMOVE_REPOSITORY_ACTION, request.session['current_login'], repository)
+    # NAFANAudit.AddAudit(username, NAFANAudit.USER_TARGET, NAFANAudit.REMOVE_REPOSITORY_ACTION, request.user, repository)
 
     from django.http import JsonResponse
     return JsonResponse({'result':'true'})
@@ -589,6 +587,7 @@ def remove_user_repository(request):
 
 # Finding Aids
 
+@login_required
 def finding_aids(request, id):
 
     # Display the finding aids main page specific to the user
@@ -599,15 +598,15 @@ def finding_aids(request, id):
     context["dataset"] = FindingAid.GetFindingAidsByRepository(repository.repository_name)
 
     # Only show repositories available to the user
-    context["repositories"] = User_Repositories.GetRepositories(request.session['current_login'])
+    context["repositories"] = User_Repositories.GetRepositories(request.user)
         
-    email = request.session['current_login']
-    user = User.GetUser(email)
+    user = request.user
     context['user_type'] = user.user_type
     context['repository_name'] = repository.repository_name
 
     return render(request, "FindingAids/finding_aids.html", context)
 
+@user_passes_test(is_contributor_admin)
 def aid_profile(request):
 
     # Display the page that holds default finding aid settings for the repository
@@ -637,12 +636,12 @@ def aid_profile(request):
     context['form']= form
     context['repository_id']= request.session['active_repository']
 
-    email = request.session['current_login']
-    user = User.GetUser(email)
+    user = request.user
     context["user_type"] = user.user_type
 
     return render(request, "FindingAids/aid_profile.html", context)
 
+@user_passes_test(is_contributor)
 def new_aid(request):
 
     # Redirect the new finding aid request to the proper page based on type desired.
@@ -670,6 +669,7 @@ def new_aid(request):
 
     return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
 
+@user_passes_test(is_contributor)
 def delete_aid(request, id):
  
     # fetch the object related to passed id
@@ -686,6 +686,7 @@ def delete_aid(request, id):
 
     return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
  
+@user_passes_test(is_contributor)
 def create_dacs(request):
 
     # Display a page for the creation of a manual DACS-based finding aid
@@ -718,7 +719,7 @@ def create_dacs(request):
         aid.revision_notes = ""
 
         # Assign the date and user of the last update
-        user = User.GetUser(request.session['current_login'])
+        user = request.user
         aid.updated_by = user.full_name
 
         today = date.today()
@@ -746,6 +747,7 @@ def create_dacs(request):
 
     return render(request, "FindingAids/create_dacs.html", context)
 
+@user_passes_test(is_contributor)
 def create_pdf(request):
 
     # Display a page for the creation of a manual DACS-based finding aid
@@ -778,7 +780,7 @@ def create_pdf(request):
         aid.revision_notes = ""
 
         # Assign the date and user of the last update
-        user = User.GetUser(request.session['current_login'])
+        user = request.user
         aid.updated_by = user.full_name
 
         today = date.today()
@@ -806,6 +808,7 @@ def create_pdf(request):
 
     return render(request, "FindingAids/create_pdf.html", context)
 
+@user_passes_test(is_contributor)
 def ingest_ead(request):
 
     repository = Repository.GetRepositoryByID(request.session['active_repository'])
@@ -819,7 +822,7 @@ def ingest_ead(request):
 
                 fileName = save_uploaded_file(f)
 
-                user = User.GetUser(request.session['current_login'])
+                user = request.user
 
                 FindingAid.EADIndex("new", repository.repository_name, fileName, user.full_name)
             
@@ -829,6 +832,7 @@ def ingest_ead(request):
 
     return render(request, 'FindingAids/ingest_ead.html', {'form': form, "repository_name":repository.repository_name, "repository_id": request.session['active_repository']})
 
+@user_passes_test(is_contributor)
 def ingest_marc(request):
  
     repository = Repository.GetRepositoryByID(request.session['active_repository'])
@@ -839,7 +843,7 @@ def ingest_marc(request):
         if form.is_valid():
             fileName = save_uploaded_file(request.FILES['file'])
 
-            user = User.GetUser(request.session['current_login'])
+            user = request.user
 
             FindingAid.MARCIndex("new", repository.repository_name, fileName, user.full_name)
             
@@ -849,6 +853,7 @@ def ingest_marc(request):
 
     return render(request, 'FindingAids/ingest_marc.html', {'form': form, "repository_name":repository.repository_name, "repository_id": request.session['active_repository']})
 
+@user_passes_test(is_contributor)
 def ingest_pdf(request, id):
  
     context = {}
@@ -873,6 +878,7 @@ def ingest_pdf(request, id):
 
     return render(request, "FindingAids/ingest_pdf.html", context)
 
+@user_passes_test(is_contributor)
 def ingest_schema(request):
 
     repository = Repository.GetRepositoryByID(request.session['active_repository'])
@@ -891,6 +897,7 @@ def ingest_schema(request):
 
     return render(request, 'FindingAids/ingest_schema.html', {'form': form, "repository_name":repository.repository_name, "repository_id": request.session['active_repository']})
 
+@user_passes_test(is_contributor)
 def update_aid(request, id):
 
     # Not entirely confident the EAD and MARC are going to be editable or if they will just be uploaded again when needed
@@ -914,6 +921,7 @@ def update_aid(request, id):
     if aid.aid_type == "pdf":
         return HttpResponseRedirect("/FindingAids/edit_pdf/" + str(id))
 
+@user_passes_test(is_contributor)
 def edit_dacs(request, id):
 
     context ={}
@@ -938,7 +946,7 @@ def edit_dacs(request, id):
         notes = aid.revision_notes
         aid.revision_notes = ""
 
-        user = User.GetUser(request.session['current_login'])
+        user = request.user
         aid.updated_by = user.full_name
 
         today = date.today()
@@ -962,6 +970,7 @@ def edit_dacs(request, id):
 
     return render(request, "FindingAids/edit_dacs.html", context)
 
+@user_passes_test(is_contributor)
 def edit_ead(request, id):
 
     # dictionary for initial data with
@@ -987,6 +996,7 @@ def edit_ead(request, id):
  
     return render(request, 'FindingAids/edit_ead.html', {'form': form, "aid": aid, "repository_id": request.session['active_repository']})
 
+@user_passes_test(is_contributor)
 def edit_marc(request, id):
 
     # dictionary for initial data with
@@ -1013,6 +1023,7 @@ def edit_marc(request, id):
  
     return render(request, 'FindingAids/edit_marc.html', {'form': form, "aid": aid, "repository_id": request.session['active_repository']})
 
+@user_passes_test(is_contributor)
 def edit_pdf(request, id):
 
     # Display a page for the creation of a manual DACS-based finding aid
@@ -1040,7 +1051,7 @@ def edit_pdf(request, id):
         aid.revision_notes = ""
 
         # Assign the date and user of the last update
-        user = User.GetUser(request.session['current_login'])
+        user = request.user
         aid.updated_by = user.full_name
 
         today = date.today()
@@ -1085,6 +1096,7 @@ def set_finding_aid_format(request):
     from django.http import JsonResponse
     return JsonResponse({'result':'true'})
 
+@user_passes_test(is_contributor)
 def add_subject_header(request):
     subject_header = request.GET.get('subject_header', None)
     aid_id = request.GET.get('aid_id', None)
@@ -1100,6 +1112,7 @@ def add_subject_header(request):
     from django.http import JsonResponse
     return JsonResponse({'result':'true'})
 
+@user_passes_test(is_contributor)
 def delete_subject_header(request, id):
     # dictionary for initial data with
     # field names as keys
@@ -1117,6 +1130,7 @@ def delete_subject_header(request, id):
 
 # Harvest
 
+@user_passes_test(is_contributor)
 def harvest_aids(request):
  
     repository = Repository.GetRepositoryByID(request.session['active_repository'])
@@ -1131,7 +1145,7 @@ def harvest_aids(request):
         # if format == "ead":
         #     FindingAid.HarvestEAD(directory, repository.repository_name)
 
-    user = User.GetUser(request.session['current_login'])
+    user = request.user
 
     if harvest_profile.harvest_type == "File":
         if harvest_profile.default_format == "PDF":
@@ -1150,18 +1164,19 @@ def harvest_aids(request):
 
     return HttpResponseRedirect("/FindingAids/finding_aids/" + str(request.session['active_repository']))
          
+@user_passes_test(is_contributor)
 def harvest_profiles(request):
     context ={}
  
     context['profiles']= HarvestProfile.GetHarvestProfiles(request.session['active_repository'])
     context['repository_id'] = request.session['active_repository']
 
-    email = request.session['current_login']
-    user = User.GetUser(email)
+    user = request.user
     context["user_type"] = user.user_type
 
     return render(request, "FindingAids/harvest_profiles.html", context)
 
+@user_passes_test(is_contributor_admin)
 def create_harvest_profile(request):
     # dictionary for initial data with
     # field names as keys
@@ -1188,6 +1203,7 @@ def create_harvest_profile(request):
 
     return render(request, "FindingAids/create_harvest_profile.html", context)
 
+@user_passes_test(is_contributor_admin)
 def edit_harvest_profile(request, id):
     # dictionary for initial data with
     # field names as keys
@@ -1217,6 +1233,7 @@ def edit_harvest_profile(request, id):
 
     return render(request, "FindingAids/edit_harvest_profile.html", context)
 
+@user_passes_test(is_contributor_admin)
 def delete_harvest_profile(request, id):
     # dictionary for initial data with
     # field names as keys
