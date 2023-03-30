@@ -2,16 +2,15 @@ from django.urls import path, include
 from NAFAN import views
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path("", views.home, name="home"),
     path("index", views.home, name="home"),
 
-    path('accounts/', include('django.contrib.auth.urls')),
+    path('login', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('logout', auth_views.LogoutView.as_view(template_name='registration/logout.html'), name='logout'),
     path('login_success/', views.login_success, name="login_success"),
-
-    #path("nafanlogin/", views.NAFANLogin, name="NAFANLogin"),
-    #path('logout/', views.NAFANlogout, name='logout'),
 
     path("forgot_password/", views.forgot_password, name="forgot_password"),
     path("help/<str:topic>", views.help, name="help"),    
