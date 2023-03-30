@@ -18,6 +18,8 @@ from pymarc import MARCReader
 from PyPDF2 import PdfFileReader
 from sickle import Sickle
 
+from django.conf import settings
+
 # The field sizes in the table definitions are all over the place as this was just to get the prototype
 # working with provided samples and there were no discussions of realistic values
 
@@ -179,7 +181,7 @@ class FindingAid(models.Model):
 
         # If there is something to index
         if title or description:
-            es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+            es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
             
             # For insert no need for {'doc': }
             record = {'id': id, 'type': index_type, 'title': title, 'repository': repository_name, 'content': description, 'source': source, 'destination': ""}
@@ -200,7 +202,7 @@ class FindingAid(models.Model):
         # If there is something to index
         if title or description:
             
-            es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+            es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
 
             # For update it needs to be wrapped in {'doc': }
             record = {'doc':{'id': id, 'type': index_type, 'title': title, 'repository': repository_name, 'content': description, 'source': source, 'destination': ""}}
@@ -217,7 +219,7 @@ class FindingAid(models.Model):
 
     def RemoveIndex(elasticsearch_id):
 
-        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
 
         try:
             es.delete(index="nafan",doc_type="_doc", id=elasticsearch_id)
@@ -254,7 +256,7 @@ class FindingAid(models.Model):
         response = "OK"
 
         # Access the search engine for indexing
-        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
 
         try:
 
@@ -746,7 +748,7 @@ class FindingAid(models.Model):
 
     def MARCIndex(id, repository, filepath, user_name):
 
-        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
 
         response = "OK"
 
@@ -954,7 +956,7 @@ class FindingAid(models.Model):
 
     def PDFIndex(id, title, description, repository, filepath):
 
-        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
 
         response = "OK"
 
@@ -1022,7 +1024,7 @@ class FindingAid(models.Model):
     def Schema_jsonLD_Index(repository, url):
 
         response = "OK"
-        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
 
         try:
 
@@ -1146,7 +1148,7 @@ class FindingAid(models.Model):
 
     def HarvestOAI(url, repository):
 
-        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
 
         # sickle = Sickle('https://archives.library.vcu.edu/oai')       # Live VCU location
         # sickle = Sickle('https://nafan.archivesspace.org/oai')        # ArchivesSpace sandbox
@@ -1221,7 +1223,7 @@ class FindingAid(models.Model):
 
     def HarvestSitemap(sitemap_url, repository):
 
-        es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
 
         # https://portal.snaccooperative.org/system/files/media/documents/Public/NAFAN_Sitemap.txt
 
@@ -1416,7 +1418,7 @@ class FindingAid(models.Model):
 
     def Search(searchTerm):
 
-        client = Elasticsearch()
+        client = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
 
         q = Q("multi_match", query=searchTerm, fields=['title', 'content'])
         s = Search(using=client, index="nafan").query(q)
@@ -1637,7 +1639,7 @@ class Schema(models.Model):
     def handle_microdata_upload(filepath):
 
         response = "OK"
-        # es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        # es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
 
         try:
 
@@ -1692,7 +1694,7 @@ class Schema(models.Model):
     def handle_rdf_upload(filepath):
 
         response = "OK"
-        # es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        # es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
 
         try:
 
@@ -1755,7 +1757,7 @@ class Schema(models.Model):
     def handle_jsonLD_upload(filepath):
 
         response = "OK"
-        # es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+        # es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
 
         try:
 

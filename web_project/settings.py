@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-i81%+qls22p%ujdc)zrj@o(@$t$+rue$wj1%k)y25^)*6)-enh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['nafan-devvm.village.virginia.edu', '128.143.231.83', '127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -103,6 +103,7 @@ DATABASES = {
 }
 
 
+
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -155,3 +156,6 @@ EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 
 AUTH_USER_MODEL = 'NAFAN.User'
+
+ES_HOST = 'localhost'
+ES_PORT = 9200
