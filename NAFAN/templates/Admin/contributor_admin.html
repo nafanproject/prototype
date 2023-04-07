@@ -247,14 +247,14 @@ max-width: 100px;
 
         <div class="col-12 col-md-10 col-lg-8 parent">
             <ul class="text-center">
-              <li><a href='http://nafan-devvm.village.virginia.edu/Repositories/repositories'><span class="links_text">Sample repository record and collection</span><br/><span class="links_text">guide management</span></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/Users/users'><span class="links_text">Sample user account management</span></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/Admin/audit'><span class="links_text">Sample user activity reports</span></a></li>
+              <li><a href="{% url 'repositories' %}"><span class="links_text">Sample repository record and collection</span><br/><span class="links_text">guide management</span></a></li>
+              <li><a href="{% url 'users' %}"><span class="links_text">Sample user account management</span></a></li>
+              <li><a href="{% url 'audit' %}"><span class="links_text">Sample user activity reports</span></a></li>
             </ul>
             <ul class="text-center">
-              <li><a href='http://nafan-devvm.village.virginia.edu/Repositories/repositories'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/repository_record.jpg" alt="Logo" height="50" width="50"></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/Users/users'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/user_accounts.jpg" alt="Logo" height="50" width="50"></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/Admin/audit'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/activity_reports.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href="{% url 'repositories' %}"><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/repository_record.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href="{% url 'users' %}"><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/user_accounts.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href="{% url 'audit' %}"><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/activity_reports.jpg" alt="Logo" height="50" width="50"></a></li>
             </ul>
         </div>
 
@@ -264,14 +264,14 @@ max-width: 100px;
 
         <div class="col-12 col-md-10 col-lg-8 parent">
             <ul class="text-center">
-              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/ingest_pdf '><span class="links_text">Sample process for creating a collection guide </span><br/><span class="links_text">(NAFAN-hosted PDF attachment option)</span></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/ingest_ead'><span class="links_text">Sample process for uploading a </span><br/><span class="links_text">collection guide (NAFAN-hosted EAD)</span></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/ingest_marc'><span class="links_text">Sample process for uploading a </span><br/><span class="links_text">collection guide (NAFAN-hosted MARC)</span></a></li>
+              <li><a href="{% url 'ingest_pdf' %}"><span class="links_text">Sample process for creating a collection guide </span><br/><span class="links_text">(NAFAN-hosted PDF attachment option)</span></a></li>
+              <li><a href="{% url 'ingest_ead' %}"><span class="links_text">Sample process for uploading a </span><br/><span class="links_text">collection guide (NAFAN-hosted EAD)</span></a></li>
+              <li><a href="{% url 'ingest_marc' %}"><span class="links_text">Sample process for uploading a </span><br/><span class="links_text">collection guide (NAFAN-hosted MARC)</span></a></li>
             </ul>
             <ul class="text-center">
-              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/ingest_pdf'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_pdf.jpg" alt="Logo" height="50" width="50"></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/ingest_ead'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_ead.jpg" alt="Logo" height="50" width="50"></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/ingest_marc'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_marc.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href="{% url 'ingest_pdf' %}"><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_pdf.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href="{% url 'ingest_ead' %}"><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_ead.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href="{% url 'ingest_marc' %}"><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_marc.jpg" alt="Logo" height="50" width="50"></a></li>
             </ul>
         </div>
 
@@ -281,10 +281,10 @@ max-width: 100px;
 
         <div class="col-12 col-md-10 col-lg-8 parent">
             <ul class="text-center">
-              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/create_harvest_profile'><span class="links_text">Sample process for harvesting a</span><br/><span class="links_text">collection guide (locally-hosted)</span></a></li>
+              <li><a href="{% url 'create_harvest_profile' %}"><span class="links_text">Sample process for harvesting a</span><br/><span class="links_text">collection guide (locally-hosted)</span></a></li>
             </ul>
             <ul class="text-center">
-              <li><a href='http://nafan-devvm.village.virginia.edu/FindingAids/create_harvest_profile'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_local.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href="{% url 'create_harvest_profile' %}"><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_local.jpg" alt="Logo" height="50" width="50"></a></li>
             </ul>
         </div>
 
