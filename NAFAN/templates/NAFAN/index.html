@@ -292,18 +292,18 @@
         
         <div class="col-12 col-md-10 col-lg-8 parent">
             <ul class="text-center">
-              <li><a href='http://nafan-devvm.village.virginia.edu/Repository_Info/New%20York%20Public%20Library'><span class="links_text">Repository record</span></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/view_aid_preliminary/20915'><span class="links_text">Collection guide</span><br/><span class="links_text">(NAFAN-hosted PDF)</span></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/view_aid_preliminary/20916'><span class="links_text">Collection guide</span><br/><span class="links_text">(NAFAN-hosted EAD)</span></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/view_aid_preliminary/22081'><span class="links_text">Collection guide</span><br/><span class="links_text">(NAFAN-hosted MARC)</span></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/view_aid_preliminary/23293'><span class="links_text">Collection guide</span><br/><span class="links_text">(locally-hosted)</span></a></li>
+              <li><a href="{% url 'Repository_Info' 'New York Public Library' %}"><span class="links_text">Repository record</span></a></li>
+              <li><a href="{% url 'view_aid_preliminary' 20915 %}"><span class="links_text">Collection guide</span><br/><span class="links_text">(NAFAN-hosted PDF)</span></a></li>
+              <li><a href="{% url 'view_aid_preliminary' 20916 %}"><span class="links_text">Collection guide</span><br/><span class="links_text">(NAFAN-hosted EAD)</span></a></li>
+              <li><a href="{% url 'view_aid_preliminary' 22081 %}"><span class="links_text">Collection guide</span><br/><span class="links_text">(NAFAN-hosted MARC)</span></a></li>
+              <li><a href="{% url 'view_aid_preliminary' 23293 %}"><span class="links_text">Collection guide</span><br/><span class="links_text">(locally-hosted)</span></a></li>
             </ul>
             <ul class="text-center">
-              <li><a href='http://nafan-devvm.village.virginia.edu/Repository_Info/New%20York%20Public%20Library'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/repository_record.jpg" alt="Logo" height="50" width="50"></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/view_aid_preliminary/20915'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_pdf.jpg" alt="Logo" height="50" width="50"></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/view_aid_preliminary/20916'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_ead.jpg" alt="Logo" height="50" width="50"></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/view_aid_preliminary/22081'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_marc.jpg" alt="Logo" height="50" width="50"></a></li>
-              <li><a href='http://nafan-devvm.village.virginia.edu/view_aid_preliminary/23293'><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_local.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href="{% url 'Repository_Info' 'New York Public Library' %}"><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/repository_record.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href="{% url 'view_aid_preliminary' 20915 %}"><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_pdf.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href="{% url 'view_aid_preliminary' 20916 %}"><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_ead.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href="{% url 'view_aid_preliminary' 22081 %}"><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_marc.jpg" alt="Logo" height="50" width="50"></a></li>
+              <li><a href="{% url 'view_aid_preliminary' 23293 %}"><img src="https://raw.githubusercontent.com/nafanproject/prototype/master/media/collection_guide_local.jpg" alt="Logo" height="50" width="50"></a></li>
             </ul>
         </div>
 
