@@ -181,7 +181,7 @@ class FindingAid(models.Model):
 
         # If there is something to index
         if title or description:
-            es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
+            es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}], http_auth=(settings.ES_USER, settings.ES_PASSWORD))
             
             # For insert no need for {'doc': }
             record = {'id': id, 'type': index_type, 'title': title, 'repository': repository_name, 'content': description, 'source': source, 'destination': ""}
@@ -202,7 +202,7 @@ class FindingAid(models.Model):
         # If there is something to index
         if title or description:
             
-            es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
+            es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}], http_auth=(settings.ES_USER, settings.ES_PASSWORD))
 
             # For update it needs to be wrapped in {'doc': }
             record = {'doc':{'id': id, 'type': index_type, 'title': title, 'repository': repository_name, 'content': description, 'source': source, 'destination': ""}}
@@ -219,7 +219,7 @@ class FindingAid(models.Model):
 
     def RemoveIndex(elasticsearch_id):
 
-        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
+        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}], http_auth=(settings.ES_USER, settings.ES_PASSWORD))
 
         try:
             es.delete(index="nafan",doc_type="_doc", id=elasticsearch_id)
@@ -256,7 +256,7 @@ class FindingAid(models.Model):
         response = "OK"
 
         # Access the search engine for indexing
-        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
+        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}], http_auth=(settings.ES_USER, settings.ES_PASSWORD))
 
         try:
 
@@ -748,7 +748,7 @@ class FindingAid(models.Model):
 
     def MARCIndex(id, repository, filepath, user_name):
 
-        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
+        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}], http_auth=(settings.ES_USER, settings.ES_PASSWORD))
 
         response = "OK"
 
@@ -956,7 +956,7 @@ class FindingAid(models.Model):
 
     def PDFIndex(id, title, description, repository, filepath):
 
-        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
+        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}], http_auth=(settings.ES_USER, settings.ES_PASSWORD))
 
         response = "OK"
 
@@ -1024,7 +1024,7 @@ class FindingAid(models.Model):
     def Schema_jsonLD_Index(repository, url):
 
         response = "OK"
-        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
+        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}], http_auth=(settings.ES_USER, settings.ES_PASSWORD))
 
         try:
 
@@ -1148,7 +1148,7 @@ class FindingAid(models.Model):
 
     def HarvestOAI(url, repository):
 
-        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
+        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}], http_auth=(settings.ES_USER, settings.ES_PASSWORD))
 
         # sickle = Sickle('https://archives.library.vcu.edu/oai')       # Live VCU location
         # sickle = Sickle('https://nafan.archivesspace.org/oai')        # ArchivesSpace sandbox
@@ -1223,7 +1223,7 @@ class FindingAid(models.Model):
 
     def HarvestSitemap(sitemap_url, repository):
 
-        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
+        es = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}], http_auth=(settings.ES_USER, settings.ES_PASSWORD))
 
         # https://portal.snaccooperative.org/system/files/media/documents/Public/NAFAN_Sitemap.txt
 
@@ -1418,7 +1418,7 @@ class FindingAid(models.Model):
 
     def Search(searchTerm):
 
-        client = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}])
+        client = Elasticsearch([{'host': settings.ES_HOST, 'port': settings.ES_PORT}], http_auth=(settings.ES_USER, settings.ES_PASSWORD))
 
         q = Q("multi_match", query=searchTerm, fields=['title', 'content'])
         s = Search(using=client, index="nafan").query(q)
