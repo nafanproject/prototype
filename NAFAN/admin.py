@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+from NAFAN.models import *
+
+class UserAdmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(User, UserAdmin)
