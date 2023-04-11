@@ -103,11 +103,10 @@ class UserForm(ModelForm):
     
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ('email', 'first_name', 'last_name', 'user_type', 'status', 'notes')
         
         widgets = {
             'email': forms.TextInput(attrs={'class': 'form-control ex_large_field'}),
-            'full_name': forms.TextInput(attrs={'class': 'form-control large_field'}),
             'user_type': forms.Select(choices=USER_TYPES),
             'status': forms.Select(choices=STATUS),
             'notes': forms.Textarea(attrs={'class': 'form-control large_field'}),
